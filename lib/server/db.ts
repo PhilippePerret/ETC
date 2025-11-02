@@ -3,7 +3,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { Database } from "bun:sqlite"
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
-import { userDataPath } from './constants_server';
+import { ENV, userDataPath } from './constants_server';
 import { startOfToday } from '../shared/utils_shared';
 import { t } from '../shared/Locale';
 import { prefs } from './prefs';
@@ -96,6 +96,10 @@ class DBWorks { /* singleton db */
   }
   private realDefValueFor(prop: string, work: any){
     switch(prop){
+      case 'leftTime':
+        return work[prop] || work.defaultLeftTime || prefs.data.duree;
+      case 'defaultLeftTime':
+        return work[prop] || prefs.data.duree;
       case 'createdAt':
         return work[prop] || new Date().getTime();
       case 'nextCronDateAt':
@@ -126,17 +130,12 @@ class DBWorks { /* singleton db */
   }
 
   private createWork(work: WorkType){
-    const duration = work.defaultLeftTime as number;
     work = this.realValuesForWork(work);
-    const request = `
-    INSERT 
-    INTO 
-      works
-      (id, project, content, folder, script, cron, cronedAt, cronNextDateAt, totalTime, cycleTime, sessionTime, leftTime, cycleCount, startedAt, lastWorkedAt, active, defaultLeftTime, report, createdAt)
-    VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
-    this.db.run(request, [work.id, work.project, work.content, work.folder, (work.script || null), (work.cron || ''), null, work.nextCronDateAt, 0, 0, 0, duration, 0, null, null, 1,  duration, "", work.createdAt])
+    const colonnes = this.workColumns.join(', ');
+    const interos = this.workColumns.map(_c => '?').join(', ');
+    const workData = this.workColumns.map((c: string) => (work as any)[c]);
+    const request = `INSERT INTO works (${colonnes}) VALUES (${interos})`;
+    this.db.run(request, workData);
   }
 
   private getNextCronDateOf(cron: string){
@@ -241,7 +240,7 @@ class DBWorks { /* singleton db */
   public getWorksOrder(): string[] {
     let res = this.db.query('SELECT v FROM keypairs WHERE k = ?').get('worksOrder');
     console.log("Res: ", res);
-    res = res || {v: []};
+    res = res || {v: ''};
     return (res as any).v.split(':') as string[];
   }
 
@@ -377,17 +376,21 @@ class DBWorks { /* singleton db */
     this.db.run(request);
 
     this.createWork(this.defaultWorkData)
+    this.saveWorksOrder([this.defaultWorkData.id]);
   }
 
   private get defaultWorkData(): WorkType{
     return {
-      id: 'start',
+      id: 'etc',
       active: 1,
       project: "ETC",
       content: t('work.very_first_one'),
       folder: path.join(os.homedir(), 'Documents'),
       leftTime: this.defaultLeftTime,
       defaultLeftTime: this.defaultLeftTime,
+      cron: undefined,
+      cronedAt: null,
+      nextCronDateAt: null,
       cycleTime: 0,
       totalTime: 0,
       cycleCount: 1,
@@ -402,7 +405,11 @@ class DBWorks { /* singleton db */
 
 
   private get db(){return this._db || (this._db = new Database(this.dbPath))}; 
-  private get dbPath(){return path.join(userDataPath as string, 'ETC.db')}
+  private get dbPath(){return path.join(userDataPath as string, this.dbName)}
+  private get dbName(): string {
+    if ( ENV === 'prod') { return 'ETC.db' }
+    else { return `ETC-${ENV}.db` }
+  }
 
   private _db!: Database;
   public static singleton(){return this.inst || (this.inst = new DBWorks())}

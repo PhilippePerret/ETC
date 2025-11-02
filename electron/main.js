@@ -28,9 +28,15 @@ const bunPath = app.isPackaged
 ? path.join(process.resourcesPath, 'bun')
 : 'bun';
 
-const PORT = app.isPackaged
-? 3003
-: 3002
+let PORT;
+
+if (process.env.NODE_ENV === 'test'){
+  PORT = 3004;
+} else if (app.isPackaged) {
+  PORT = 3003;
+} else {
+  PORT = 3002;
+}
 const HOST = `http://localhost:${PORT}`;
 
 
@@ -40,6 +46,7 @@ const envProps = {
   USER_DATA_PATH: userDataPath,
   APP_ICON_PATH: ICON_PATH,
   ETC_MODE: app.isPackaged ? 'prod' : 'dev',
+  NODE_ENV: process.env.NODE_ENV || (app.isPackaged ? 'prod' : 'dev'),
   PORT: PORT,
   HOST: HOST
 }
@@ -85,8 +92,6 @@ app.whenReady().then(() => {
   console.log('CWD:', path.join(__dirname, '..').replace('app.asar', 'app.asar.unpacked'));
   //*/
 
-  startAServer();
-  
   const win = new BrowserWindow({
     x: 10,
     y: WITH_CONSOLE_DEV ? 400 : 800,

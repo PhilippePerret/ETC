@@ -23,7 +23,7 @@ export interface WorkType {
     folder: string; // Required (to watch activity)
     script?: string; // path du script de démarrage
     cron?: string;
-    cronedAt?: number;
+    cronedAt: number | null;
     nextCronDateAt: number | null;
     defaultLeftTime?: number;
     totalTime: number;  // Le nombre total de minutes de travail
