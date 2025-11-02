@@ -24167,7 +24167,14 @@ class Editing {
       const work = this.originalWorks[workId];
       this.createNewTask(work);
     });
-    DGet("span#works-count", this.section).innerHTML = works.length;
+    this.setWorksCount();
+  }
+  setWorksCount() {
+    const counts = [0, 0];
+    this.workContainer.querySelectorAll("select.form-work-active").forEach((s) => {
+      ++counts[Number(s.value)];
+    });
+    DGet("span#works-count", this.section).innerHTML = `on${t("ui.colon")}${counts[1]} / off${t("ui.colon")}${counts[0]}`;
   }
   async onSaveData() {
     const collectedData = await this.collectTaskData();
@@ -24401,6 +24408,7 @@ class Editing {
     menuActive.addEventListener("change", (ev) => {
       const actif = menuActive.value === "1";
       owork.classList[actif ? "remove" : "add"]("off");
+      this.setWorksCount();
     });
     listenChange(".form-work-cron", this.onChangeCron.bind(this), owork);
     listenChange(".form-work-script", this.onChangeScript.bind(this), owork);

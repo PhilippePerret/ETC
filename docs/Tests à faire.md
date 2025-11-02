@@ -78,6 +78,9 @@
 - [ ] Présente un bouton « Finir »
 - [ ] Présente un bouton « Enregistrer »
 - [ ] Présente un lien d’aide pour rejoindre le site pour établir le Cron
+- [ ] Un bouton « Ouvrir » à côté du champ folder quand il est défini
+- [ ] Un bouton « Jouer » à côté du champ script quand il est défini
+- [ ] Un bouton permet de choisir le travail comme travail courant
 
 ### Fonctionnement
 
@@ -91,6 +94,9 @@
 - [ ] Le bouton « Enregistrer » enregistre la nouvelle liste (création + suppression + ordre)
 - [ ] Le champ « cron » affiche tout de suite un message d’erreur s’il est mauvai
 - [ ] Le champ « cron » affiche tout de suite la prochaine échéance (quand il est correct)
+- [ ] Le bouton « open » permet d’ouvrir le dossier défini
+- [ ] Le bouton « Jouer » permet de jouer le script défini
+- [ ] Le bouton « Choisir comme courant » met le travail en travail courant (alerte si des modifications n’ont pas été enregistrées)
 
 ### Enregistrement
 

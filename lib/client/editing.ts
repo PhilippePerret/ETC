@@ -63,7 +63,16 @@ class Editing {
       this.createNewTask(work);
     })
     // Indication du nombre de travaux dans le titre
-    DGet('span#works-count', this.section).innerHTML = works.length;
+    this.setWorksCount()
+  }
+
+  private setWorksCount(){
+    const counts = [0, 0];
+    this.workContainer.querySelectorAll('select.form-work-active').forEach(s => {
+      // @ts-ignore
+      ++ counts[Number(s.value)];
+    })
+    DGet('span#works-count', this.section).innerHTML = `on${t('ui.colon')}${counts[1]} / off${t('ui.colon')}${counts[0]}`;
   }
 
   /**
@@ -354,7 +363,8 @@ class Editing {
     const menuActive = DGet('.form-work-active', owork)
     menuActive.addEventListener('change', (ev: Event) => {
       const actif = menuActive.value === '1';
-      owork.classList[actif?'remove':'add']('off'); 
+      owork.classList[actif?'remove':'add']('off');
+      this.setWorksCount();
     });
     // Au changement du cron
     listenChange('.form-work-cron', this.onChangeCron.bind(this), owork);

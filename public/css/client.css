@@ -10,7 +10,8 @@ textarea {
 .fleft {float: left;}
 .fright {float: right;}
 
-.tiny {font-size: 0.6em;}
+.small {font-size: 0.85em}
+.tiny {font-size: 0.6em}
 .mono {font-family: monospace, 'Courier New', Courier}
 
 .error, .error * {
