@@ -7,6 +7,7 @@ import { EndWorkReport } from "./stop_report";
 import { markdown } from "../shared/utils_shared";
 import { postToServer } from "./utils";
 import { t } from "../shared/Locale";
+import type { RecordWithTtl } from "dns";
 
 export class Work {
 
@@ -101,6 +102,12 @@ export class Work {
       this.displayWork(retour.work, retour.options);
       return true;
     }
+  }
+
+  // Pour pouvoir mettre un travail en travail courant depuis
+  // l'extérieur (la liste des tâches par exemple)
+  public static setAsCurrent(work: WorkType, options?: RecType){
+    this.displayWork(work, options || {});
   }
 
   private static displayWork(

@@ -356,6 +356,11 @@ class Editing {
     listenBtn('remove', this.onRemove.bind(this, work), owork);
     listenBtn('run-script', this.onRunScript.bind(this, work), owork);
     listenBtn('open-folder', this.onOpenFolder.bind(this, work), owork);
+    if (work.id !== Work.currentWork.id) {
+      listenBtn('start', this.onSetAsCurrent.bind(this, work), owork);
+    } else {
+      DGet(`.btn-start`, owork).classList.add('hidden');
+    }
     owork.querySelectorAll('input[type="text"]').forEach(o => {
       o.addEventListener('focus', () => {(o as HTMLInputElement).select()})
     })
@@ -416,6 +421,18 @@ class Editing {
       Flash.error('error.no_folder_to_open_yet')
     }
   }
+
+  // Function to set the work as current work
+  private async onSetAsCurrent(work: WorkType, ev: MouseEvent){
+    if (await this.enableToStopEditing()) {
+      Work.setAsCurrent(work);
+      ui.toggleSection('work');
+    } else {
+      console.log("Abandon");
+    }
+
+  }
+
   // Function du bouton pour lancer le script
   private async onRunScript(work: WorkType, ev: MouseEvent) {
     const script = this.fieldOf(work, 'script').value;
@@ -592,17 +609,23 @@ class Editing {
    */
   async stopEditing(){
     console.log("-> stopEditing")
+    if (await this.enableToStopEditing()) {
+      ui.toggleSection('work');
+    }
+    console.log("<- stopEditing")
+  }
+
+  async enableToStopEditing(): Promise<boolean> {
     if (this.isOriginalListDifferentFromCurrent()){
       const retour = await (this.closeConfirmDialog.showAsync());
       if (retour === 'cancel') { 
         log.info("Abandon de la fermeture");
-        return;
+        return false;
       }
     } else {
       console.log("Aucune changement noté.");
     }
-    ui.toggleSection('work');
-    console.log("<- stopEditing")
+    return true;
   }
 
   private get closeConfirmDialog(): Dialog{

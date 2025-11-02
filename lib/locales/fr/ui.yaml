@@ -88,6 +88,7 @@ ui:
     lang: Langue
     order: Ordre
     path_example: "chemin/vers/projet/requis"
+    set_as_current: "Mettre en tâche courante."
     shortest_works_first: Les plus courtes d’abord
     works_in_random_order: Tâches au hasard
     temp_description: "Description de votre projet/tâche. Mettre en actif pour l'activer."

@@ -22915,6 +22915,9 @@ class Work {
       return true;
     }
   }
+  static setAsCurrent(work, options) {
+    this.displayWork(work, options || {});
+  }
   static displayWork(wdata, options) {
     this.currentWork = new Work(wdata);
     this.currentWork.display(options);
@@ -24413,6 +24416,11 @@ class Editing {
     listenBtn("remove", this.onRemove.bind(this, work), owork);
     listenBtn("run-script", this.onRunScript.bind(this, work), owork);
     listenBtn("open-folder", this.onOpenFolder.bind(this, work), owork);
+    if (work.id !== Work.currentWork.id) {
+      listenBtn("start", this.onSetAsCurrent.bind(this, work), owork);
+    } else {
+      DGet(`.btn-start`, owork).classList.add("hidden");
+    }
     owork.querySelectorAll('input[type="text"]').forEach((o) => {
       o.addEventListener("focus", () => {
         o.select();
@@ -24454,6 +24462,14 @@ class Editing {
       postToServer("/tool/open-folder", { process: "Editing.onOpenFolder", folder });
     } else {
       Flash.error("error.no_folder_to_open_yet");
+    }
+  }
+  async onSetAsCurrent(work, ev) {
+    if (await this.enableToStopEditing()) {
+      Work.setAsCurrent(work);
+      ui.toggleSection("work");
+    } else {
+      console.log("Abandon");
     }
   }
   async onRunScript(work, ev) {
@@ -24592,17 +24608,22 @@ class Editing {
   }
   async stopEditing() {
     console.log("-> stopEditing");
+    if (await this.enableToStopEditing()) {
+      ui.toggleSection("work");
+    }
+    console.log("<- stopEditing");
+  }
+  async enableToStopEditing() {
     if (this.isOriginalListDifferentFromCurrent()) {
       const retour = await this.closeConfirmDialog.showAsync();
       if (retour === "cancel") {
         import_renderer4.default.info("Abandon de la fermeture");
-        return;
+        return false;
       }
     } else {
       console.log("Aucune changement noté.");
     }
-    ui.toggleSection("work");
-    console.log("<- stopEditing");
+    return true;
   }
   get closeConfirmDialog() {
     return this._closeconfdial || (this._closeconfdial = new Dialog({

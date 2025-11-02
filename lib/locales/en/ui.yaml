@@ -88,6 +88,7 @@ ui:
     lang: Lang
     order: Order
     path_example: "required/path/to/project"
+    set_as_current: "Set as current work."
     shortest_works_first: Shortest works first
     works_in_random_order: Tasks in random order
     temp_description: "Description of your project/work.Set active to true to active it."

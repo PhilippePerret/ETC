@@ -16710,6 +16710,9 @@ class Work {
       return true;
     }
   }
+  static setAsCurrent(work, options) {
+    this.displayWork(work, options || {});
+  }
   static displayWork(wdata, options) {
     this.currentWork = new Work(wdata);
     this.currentWork.display(options);

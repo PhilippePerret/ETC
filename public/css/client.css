@@ -35,6 +35,14 @@ span[onclick] {
   cursor: pointer;
 }
 
+button.no-btn {
+  padding:0;
+  background-color: transparent;
+  border: none;
+  margin:0;
+  width:auto;
+}
+
 ul.contains-work-list {
   list-style: none;
 }
