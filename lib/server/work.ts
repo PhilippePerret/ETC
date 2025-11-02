@@ -1,10 +1,11 @@
 import db from "./db";
+import path from "path";
+import log from 'electron-log/main';
 import { prefs } from "./prefs";
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
 import { t } from '../shared/Locale';
 import { startOfToday } from "../shared/utils_shared";
-import log from 'electron-log/main';
-import { CronExpressionParser } from 'cron-parser';
+import { writeFileSync } from "fs";
 
 export class Work /* server */ {
   public static defaultDuration: number;
@@ -16,6 +17,20 @@ export class Work /* server */ {
     this.defaultDuration = prefs.data.duree;
     this.prepareDefaultWork(this.defaultDuration);
   }
+
+  /** Quand un changelog a été défini pour le travail
+   * courant, on l'enregistre dans un fichier à la racine
+   * du projet.
+   */
+  public static saveChangelog(log: string, folder: string){
+    const logpath = path.join(folder, 'CHANGELOG');
+    const code = `
+    # ${new Date().toLocaleDateString(prefs.data.lang)}
+
+    ${log}`
+    writeFileSync(logpath, code + "\n\n", {encoding: 'utf8'});
+  }
+
   private static prepareDefaultWork(dureeDefault: number){
     Object.assign(DEFAULT_WORK, {
       defaultLeftTime: dureeDefault,

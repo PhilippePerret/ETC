@@ -95,7 +95,8 @@ export class EndWorkReport {
    */
   private getData(){
     return {
-      content: this.contentField.value,
+      content: this.contentField.value.trim(),
+      changelog: this.changedlogField.value.trim(),
       desactivate: (this.desactiveField.checked === true)
     }
   }
@@ -132,6 +133,9 @@ export class EndWorkReport {
   private get contentField(){
     return this._contfield || (this._contfield = DGet('textarea#ETR-report', this.obj));
   }
+  private get changedlogField(){
+    return this._logfield || (this._logfield = DGet('textarea#ETR-changelog', this.obj));
+  }
   private get desactiveField(){
     return this._desactfield || (this._desactfield = DGet('input#ETR-desactive-work', this.obj));
   }
@@ -142,6 +146,7 @@ export class EndWorkReport {
 
 
   private _contfield!: HTMLTextAreaElement;
+  private _logfield!: HTMLTextAreaElement;
   private _desactfield!: HTMLInputElement;
   private _obj!: HTMLDivElement;
 

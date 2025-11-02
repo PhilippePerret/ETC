@@ -257,8 +257,8 @@ div#ETR-container {
   padding: 1em 2em;
   left: 100px;
   width: calc(100% - 200px - 2em);
-  top: 10px;
-  height: 500px ;
+  top: 4px;
+  height: calc(92vh - 8px) ;
   background-color: white;
   box-shadow: 5px 5px 16px 0px #4f4f4f;
 }
@@ -279,10 +279,22 @@ div#ETR-container div#ETR-explication {
 
 div#ETR-container textarea#ETR-report {
   width: calc(100% - 2em);
-  height: 320px;
   padding: 0.5em;
-  resize: none;
+  height: 3vh;
   font-family: Georgia, 'Times New Roman', Times, serif;
+}
+div#ETR-container textarea#ETR-report:focus {
+  height: 43vh;
+}
+
+div#ETR-container textarea#ETR-changelog {
+  width: calc(100% - 2em);
+  padding: 0.5em;
+  height: 3vh;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+div#ETR-container textarea#ETR-changelog:focus {
+  height: 43vh;
 }
 
 div#ETR-container div.buttons {
