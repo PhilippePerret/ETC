@@ -108,7 +108,23 @@
 - [ ] Produit une erreur si le script est défini mais n’existe pas
 - [ ] Produit une erreur si le cron est mal défini
 
+## Panneau du Stop-report
 
+### Éléments
+
+- [ ] Le titre
+- [ ] le champ pour le stop-report
+- [ ] Le champ pour le change log
+- [ ] La case à cocher pour dire que le travail est fini
+- [ ] Le bouton pour ne rien enregistrer
+- [ ] Le bouton pour utiliser un modèle.
+
+### Fonctionnement
+
+- [ ] Le bouton pour ne rien enregistrer est fonctionnel
+- [ ] La case à cocher pour marquer le travail fini est fonctionnelle
+- [ ] Le bouton pour utiliser un modèle est fonctionnel
+- [ ] Le bouton pour Enregistrer le rapport est fonctionnel
 
 ## Traitement des travaux
 

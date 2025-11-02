@@ -22,13 +22,14 @@ export class Work /* server */ {
    * courant, on l'enregistre dans un fichier à la racine
    * du projet.
    */
-  public static saveChangelog(log: string, folder: string){
-    const logpath = path.join(folder, 'CHANGELOG');
+  public static saveChangelog(changelog: string, folder: string){
+    const logpath = path.join(folder, 'CHANGELOG.md');
     const code = `
     # ${new Date().toLocaleDateString(prefs.data.lang)}
 
-    ${log}`
+    ${changelog}`
     writeFileSync(logpath, code + "\n\n", {encoding: 'utf8'});
+    log.info("Enregistrement du changelog avec ", code);
   }
 
   private static prepareDefaultWork(dureeDefault: number){
