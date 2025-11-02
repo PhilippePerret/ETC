@@ -24444,9 +24444,14 @@ class Editing {
       }
     }
   }
+  fieldOf(work, prop) {
+    const workId = typeof work === "string" ? work : work.id;
+    return DGet(`.form-work-${prop}`, DGet(`div#work-${workId}`));
+  }
   async onOpenFolder(work, ev) {
-    if (work.folder) {
-      postToServer("/tool/open-folder", { process: "Editing.onOpenFolder", folder: work.folder });
+    const folder = this.fieldOf(work, "folder").value;
+    if (folder) {
+      postToServer("/tool/open-folder", { process: "Editing.onOpenFolder", folder });
     } else {
       Flash.error("error.no_folder_to_open_yet");
     }
@@ -24551,7 +24556,6 @@ class Editing {
     }
     try {
       const nextTime = import_cron_parser.CronExpressionParser.parse(cron, { strict: true }).next();
-      console.log("next", nextTime);
       const lang = `${prefs_default.getLang()}-${prefs_default.getLang().toUpperCase()}`;
       const jour = nextTime.toDate().toLocaleDateString(lang);
       const heure = nextTime.toDate().toLocaleTimeString(lang).split(":").slice(0, 2).join(":");

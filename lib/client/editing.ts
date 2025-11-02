@@ -394,10 +394,24 @@ class Editing {
     }
   }
 
+  /**
+   * Retourne le champ HTML (input, select…) de la propriété +prop+
+   * du travail +work+
+   * 
+   * @param work Travail (WorkType) ou identifiant
+   * @param prop Propriété à laquelle appartient le champ
+   * @returns Le champ HTML
+   */
+  private fieldOf(work: WorkType | string, prop: string){
+    const workId = 'string' === typeof work ? work : work.id;
+    return DGet(`.form-work-${prop}`, DGet(`div#work-${workId}`));
+  }
+
   // Function du bouton pour ouvrir le dossier
   private async onOpenFolder(work: WorkType, ev: MouseEvent){
-    if (work.folder) {
-      postToServer('/tool/open-folder', {process: 'Editing.onOpenFolder', folder: work.folder}) as any;
+    const folder = this.fieldOf(work, 'folder').value;
+    if (folder) {
+      postToServer('/tool/open-folder', {process: 'Editing.onOpenFolder', folder: folder}) as any;
     } else {
       Flash.error('error.no_folder_to_open_yet')
     }
@@ -526,7 +540,6 @@ class Editing {
     if (cron.split(' ').length === 5) { cron = `* ${cron}`; }
     try {
       const nextTime = CronExpressionParser.parse(cron, {strict: true}).next();
-      console.log("next", nextTime);
       const lang = `${prefs.getLang()}-${prefs.getLang().toUpperCase()}`;
       const jour = nextTime.toDate().toLocaleDateString(lang);
       const heure = nextTime
