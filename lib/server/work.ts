@@ -87,31 +87,44 @@ export class Work /* server */ {
 
 
   /**
-   * Réveil des travaux a
-   * - avoir un cron défini
-   * - être inactif
+   * Réveil des travaux a avec Cron
+   * ------------------------------
+   * On réveille un travail si :
+   * - il a un cron défini
+   * - il est inactif
+   * - il n'a pas de date de cron et la 
    * - avoir une échéance dans le passé
    *   MAIS aucun enregistrement cronedAt 
    *   OU aucun enregistrement après cette échéance (ce qui 
    *   prouve que le travail n'a pas été démarré et accompli)
    */
   private static awakeCronWorksAtHeadline(){
-    const candidats = db.findAll('active = 0 AND cron IS NOT null');
-    const idsToAwake: string[] = candidats.filter((w: WorkType) => {
-      const lastHeadline = CronExpressionParser.parse(w.cron as string).prev().toDate().getTime();
-      return (w.cronedAt === null || Number(w.cronedAt) < lastHeadline);
-    })
-    .map(c => c.id);
-    // Construction de la requête qui va les réveiller
-    const interos = idsToAwake.map(_x => '?').join(', ')
+    const condition = `
+    active = 0
+    AND cron <> ''
+    AND nextCronDateAt < ?
+    AND (
+      cronedAt IS NULL
+      OR
+      cronedAt < nextCronDateAt
+    )
+
+    `
+
+    const checkRequest = `SELECT id FROM works WHERE ${condition}`
+    const idsToAwake = db.exec(checkRequest);
+    log.info("Works with cron awaken:", idsToAwake);
+
     const request = `
     UPDATE works
     SET
-      active = 1, leftTime = defaultLeftTime
+      active = 1, 
+      leftTime = defaultLeftTime
     WHERE 
-      id IN (${interos})
+      ${condition}
     `
-    db.exec(request, idsToAwake)
+    db.exec(request);
+
   }
 
 

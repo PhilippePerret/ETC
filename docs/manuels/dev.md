@@ -8,6 +8,15 @@
 
 **Question** : Comment peut-on savoir que le cron est à lancer ?
 
+**Réflexion concrète** (car je n’arrive pas à bien le réveiller. Prenons un cas concret :
+
+Nous sommes le 12 avril, un travail a un cron qui doit l’activer le 25 décembre (2025). Si je prends la précédente date d’échéance (25 décembre 2024), je ne trouve pas de cronedAt donc je vais l’activer. Je pourrais vérifier avec la date de création du travail mais cette information n’existe pas ? DONC JE SUIS COINCÉ :
+
+Solutions :
+
+1) j’enregistre la date de création du travail et je m’assure que la date précédente était après la création du travail => il demande à être activé. Il la faut de toute façon => la créer
+2) Ou plus simple, j’ajoute une colonne « next_cron_headline » qui contient toujours la prochaine date d’activation. Si elle est dépassée (et qu’il n’y a  pas eu de cronedAt) => on la réveille
+
 **Réponse** : quand 1) le travail n’est pas actif, 2) la prochaine échéance est passée 2) la date d’enregistrement du dernier cron est supérieure à l’échéance précédente et 3) la date d’enregistrement du dernier cron (`cronedAt`) est inférieure à la prochaine date.
 
 Ou plutôt : 1) le travail est inactif, 2) on a passé la dernière date de déclenchement et 3) aucun cronedAt n’a été enregistré après cette date de déclenchement (ce qui sous-entend que le dernier déclenchement n’a pas pu être activé, certainement parce que l’application n’était pas en service à ce moment (c’est ça, en fait, qui pose problème dans l’algorithme.

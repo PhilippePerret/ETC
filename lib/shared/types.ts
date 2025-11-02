@@ -24,6 +24,7 @@ export interface WorkType {
     script?: string; // path du script de démarrage
     cron?: string;
     cronedAt?: number;
+    nextCronDateAt: number | null;
     defaultLeftTime?: number;
     totalTime: number;  // Le nombre total de minutes de travail
     cycleTime: number;  // Le nombre de minutes travaillées dans le cycle courant
@@ -32,6 +33,7 @@ export interface WorkType {
     startedAt: number;  // Date de démarrage du travail
     lastWorkedAt: number | undefined; // Date de dernier travail
     report: string; // Le Stop Report (rapport de fin, bâton de relais)
+    createdAt: number;
 }
 export const DEFAULT_WORK = {
   id: 'defaultid',
@@ -43,13 +45,15 @@ export const DEFAULT_WORK = {
   script: '',
   cron: '',
   cronedAt: null,
+  nextCronDateAt: null,
   totalTime: 0,
   cycleTime: 0,
   leftTime: 0,
   cycleCount: 0,
   startedAt: null,
   lastWorkedAt: null,
-  report: ''
+  report: '',
+  createdAt: null
 }
 export const WORK_PROPS = Object.keys(DEFAULT_WORK);
 

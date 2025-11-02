@@ -24130,13 +24130,15 @@ var DEFAULT_WORK = {
   script: "",
   cron: "",
   cronedAt: null,
+  nextCronDateAt: null,
   totalTime: 0,
   cycleTime: 0,
   leftTime: 0,
   cycleCount: 0,
   startedAt: null,
   lastWorkedAt: null,
-  report: ""
+  report: "",
+  createdAt: null
 };
 var WORK_PROPS = Object.keys(DEFAULT_WORK);
 

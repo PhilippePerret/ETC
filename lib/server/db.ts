@@ -8,6 +8,7 @@ import { startOfToday } from '../shared/utils_shared';
 import { t } from '../shared/Locale';
 import { prefs } from './prefs';
 import log from 'electron-log/main';
+import { CronExpressionParser } from 'cron-parser';
 
 class DBWorks { /* singleton db */
 
@@ -50,17 +51,19 @@ class DBWorks { /* singleton db */
     return this.run(request, {data: ids}) as WorkType[];
   }
 
+
   public saveAllWorks(works: WorkType[]): {ok: boolean, error: ''} {
     log.info("Works to save:", works);
     try {
-      const colonnes  = Object.keys(DEFAULT_WORK);
+      const colonnes  = this.workColumns;
       const interos   = colonnes.map(c => `?`)
       const request = `INSERT OR REPLACE INTO works (${colonnes.join(', ')}) VALUES (${interos.join(', ')})`;
       // log.info("REQUEST:", request);
       const upsertWork = this.db.prepare(request);
       const trans = this.db.transaction((works: WorkType[]) => {
-        works.forEach((work: RecType) => {
-          const values: any[] = colonnes.map(c => work[c] || (DEFAULT_WORK as any)[c]);
+        works.forEach((work: WorkType) => {
+          work = this.realValuesForWork(work);
+          const values: any[] = colonnes.map(c => (work as any)[c]);
           // log.info("COLUMNS VALUE: ", values);
           upsertWork.run(values as any);
         })
@@ -72,17 +75,72 @@ class DBWorks { /* singleton db */
     }
   }
 
-  private createNewWork(work: WorkType){
+  private get workColumns(){
+    return this._wcols || (this._wcols = Object.keys(DEFAULT_WORK))
+  };private _wcols!: string[];
+
+  /**
+   * Mets dans les données du travail les bonnes valeurs, en 
+   * complétant celles qui manquent.
+   * Exemple :
+   *  - la date de création (createdAt)
+   *  - la date de prochain cron si le cron est défini
+   *  - etc.
+   */
+  private realValuesForWork(work: WorkType): WorkType {
+    const realValues = {}
+    this.workColumns.forEach((col: string) => {
+      Object.assign(realValues, {[col]: this.realDefValueFor(col, work)})
+    });
+    return realValues as WorkType;
+  }
+  private realDefValueFor(prop: string, work: any){
+    switch(prop){
+      case 'createdAt':
+        return work[prop] || new Date().getTime();
+      case 'nextCronDateAt':
+        if (work.cron) {
+          return this.getNextCronDateOf(work.cron);
+        } else {
+          return null;
+        }
+      default: 
+        return work[prop] || (DEFAULT_WORK as any)[prop];
+    }
+  }
+
+  /**
+   * Fonction pour enregistrer un travail (déjà créé)
+   * 
+   * (cette fonction ne sert pas encore puisque pour le moment tous
+   * les travaux sont enregistrés ensemble)
+   * 
+   * @param work Les données du travail
+   */
+  public updateWork(work: WorkType) {
+    work = this.realValuesForWork(work);
+    const cols = Object.keys(work); // Mind: peut-être pas toutes !
+    const columns = cols.map((c: string) => `${c} = ?`).join(', ');
+    const request = `UPDATE works SET ${columns}`;
+    this.db.run(request, Object.values(work));
+  }
+
+  private createWork(work: WorkType){
     const duration = work.defaultLeftTime as number;
+    work = this.realValuesForWork(work);
     const request = `
     INSERT 
     INTO 
       works
-      (id, project, content, folder, script, cron, cronedAt, totalTime, cycleTime, sessionTime, leftTime, cycleCount, startedAt, lastWorkedAt, active, defaultLeftTime, report)
+      (id, project, content, folder, script, cron, cronedAt, cronNextDateAt, totalTime, cycleTime, sessionTime, leftTime, cycleCount, startedAt, lastWorkedAt, active, defaultLeftTime, report, createdAt)
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
-    this.db.run(request, [work.id, work.project, work.content, work.folder, (work.script || null), (work.cron || null), null, 0, 0, 0, duration, 0, new Date().getTime(), null, 1,  duration, ""])
+    this.db.run(request, [work.id, work.project, work.content, work.folder, (work.script || null), (work.cron || ''), null, work.nextCronDateAt, 0, 0, 0, duration, 0, null, null, 1,  duration, "", work.createdAt])
+  }
+
+  private getNextCronDateOf(cron: string){
+    return CronExpressionParser.parse(cron).next().toDate().getTime();
   }
 
   /**
@@ -298,6 +356,7 @@ class DBWorks { /* singleton db */
       script TEXT,
       cron TEXT,
       cronedAt INTEGER,
+      nextCronDateAt INTEGER,
       totalTime INTEGER,
       cycleTime INTEGER,
       sessionTime INTEGER,
@@ -307,7 +366,8 @@ class DBWorks { /* singleton db */
       lastWorkedAt INTEGER,
       active INTEGER,
       defaultLeftTime INTEGER,
-      report STRING
+      report STRING,
+      createdAt INTEGER
     );
     CREATE TABLE IF NOT EXISTS keypairs (
       k TEXT PRIMARY KEY,
@@ -316,7 +376,7 @@ class DBWorks { /* singleton db */
     `.trim().replace(/\n\s+/m,' ');
     this.db.run(request);
 
-    this.createNewWork(this.defaultWorkData)
+    this.createWork(this.defaultWorkData)
   }
 
   private get defaultWorkData(): WorkType{
@@ -333,7 +393,8 @@ class DBWorks { /* singleton db */
       cycleCount: 1,
       startedAt: new Date().getTime(),
       lastWorkedAt: undefined,
-      report: ''
+      report: '',
+      createdAt: new Date().getTime()
     } as WorkType;
   }
 
