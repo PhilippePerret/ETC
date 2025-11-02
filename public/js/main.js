@@ -24457,8 +24457,9 @@ class Editing {
     }
   }
   async onRunScript(work, ev) {
-    if (work.script) {
-      const retour = postToServer("/tool/run-script", { process: "Editing.onRunScript", script: work.script });
+    const script = this.fieldOf(work, "script").value;
+    if (script) {
+      const retour = postToServer("/tool/run-script", { process: "Editing.onRunScript", script });
       if (retour.ok && retour.message) {
         Flash.notice(`${t("ui.text.script_return")}${t("ui.colon")}${retour.message}`);
       }
