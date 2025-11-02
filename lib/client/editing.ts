@@ -68,7 +68,7 @@ class Editing {
 
   private setWorksCount(){
     const counts = [0, 0];
-    this.workContainer.querySelectorAll('select.form-work-active').forEach(s => {
+    this.workContainer.querySelectorAll('select.form-work-active').forEach((s: HTMLSelectElement) => {
       // @ts-ignore
       ++ counts[Number(s.value)];
     })
