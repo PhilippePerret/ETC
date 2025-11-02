@@ -179,6 +179,7 @@ div.buttons {
   text-align: right;
 }
 
+
 .flex {
   display: flex;
 }
@@ -284,6 +285,13 @@ div#ETR-container div.buttons {
   background-color: #2a3e3e;
   padding: 8px 1em;
 }
+div#ETR-container div.buttons div:first-child {
+  text-align: left;
+  margin-bottom: 12px;
+}
+body.dark div#ETR-container div.buttons { color: white;}
+body.light div#ETR-container div.buttons { color: white;}
+
 
 div#tools-container {
   border: 1px solid #DDDDDD;

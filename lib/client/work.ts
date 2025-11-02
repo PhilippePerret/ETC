@@ -50,23 +50,29 @@ export class Work {
       this.data.startedAt = clock.getStartTime() * 1000;
     }
     this.data.lastWorkedAt = clock.getStartTime() * 1000;
-    const stopReport = await new EndWorkReport(this).writeReport();
+    const stopReport = await new EndWorkReport(this).writeReport() as any;
     if (!stopReport /* annulation */) {
       await Work.getCurrent();
       return false;
     }
-
-
     
-    this.data.report = stopReport as string;
+    this.data.report = stopReport.content as string;
+    this.data.active = stopReport.desactivate ? 0 : 1;
     console.log("[addTimeAndSave] Enregistrement des temps et du rapport", this.data);
-    const result: RecType = await postToServer('/work/save-session', this.data);
+    const result: RecType = await postToServer('/work/save-session', {work: this.data});
     // console.log("Retour save session: ", result);
     // On actualise l'affichage pour apercevoir les nouveaux temps
     // pendant 2 secondes puis on passe à la tâche suivante, qui a
     // été remontée.
-    this.dispatchData();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // (sauf si le travail a été désactivé)
+    if (stopReport.desactivate) {
+      // En cas de désactivation
+      Flash.notice(t('work.desactivated'));
+    } else {
+      // Normal case
+      this.dispatchData();
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
     Work.displayWork(result.next, result.options);
     if (result.ok) { Flash.success(t('times.saved'));}
     return true;

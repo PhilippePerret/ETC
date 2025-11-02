@@ -40,6 +40,7 @@ work:
   any_active: No active work.
   saved: Works saved successfully
   unchanged: "No changes detected, nothing to save."
+  desactivated: "Work has been desactivated."
 
 times:
   dont_add_and_save: "I don’t add & save time"

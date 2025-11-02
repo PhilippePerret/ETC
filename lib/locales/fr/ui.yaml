@@ -83,6 +83,7 @@ ui:
     counter_mode: Mode de compteur
     cycle: Cycle
     default_duration: Durée par défaut
+    desactive_work: "Ce travail est terminé"
     elapsed_time: Temps accompli
     lang: Langue
     order: Ordre

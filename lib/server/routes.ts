@@ -44,7 +44,8 @@ export function setupRoutes(app: Express) {
 
   app.post('/work/save-session', (req, res) => {
     log.info("-> /work/save-session");
-    const dwork = req.body;
+    const dreq = req.body;
+    const dwork = dreq.work;
     log.info("Sauvegarde de la session : ", dwork);
     db.updateWorkTimes(dwork);
     res.json({

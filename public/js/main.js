@@ -10781,7 +10781,7 @@ class EndWorkReport {
   }
   onSave(ev) {
     this.close();
-    this.ok(this.getContent());
+    this.ok(this.getData());
     ev && stopEvent(ev);
     return false;
   }
@@ -10792,15 +10792,18 @@ class EndWorkReport {
     return false;
   }
   onTemplate(ev) {
-    if (this.getContent().length) {
+    if (this.contentField.value.length) {
       Flash.error(t("report.empty_content"));
     } else {
       this.setContent(this.TEMPLATES[0]);
     }
     return ev && stopEvent(ev);
   }
-  getContent() {
-    return this.contentField.value;
+  getData() {
+    return {
+      content: this.contentField.value,
+      desactivate: this.desactiveField.checked === true
+    };
   }
   setContent(s) {
     this.contentField.value = s;
@@ -10828,10 +10831,14 @@ class EndWorkReport {
   get contentField() {
     return this._contfield || (this._contfield = DGet("textarea#ETR-report", this.obj));
   }
+  get desactiveField() {
+    return this._desactfield || (this._desactfield = DGet("input#ETR-desactive-work", this.obj));
+  }
   get obj() {
     return this._obj || (this._obj = DGet("div#ETR-container"));
   }
   _contfield;
+  _desactfield;
   _obj;
   TEMPLATES = [
     `
@@ -22873,11 +22880,16 @@ class Work {
       await Work.getCurrent();
       return false;
     }
-    this.data.report = stopReport;
+    this.data.report = stopReport.content;
+    this.data.active = stopReport.desactivate ? 0 : 1;
     console.log("[addTimeAndSave] Enregistrement des temps et du rapport", this.data);
-    const result = await postToServer("/work/save-session", this.data);
-    this.dispatchData();
-    await new Promise((resolve2) => setTimeout(resolve2, 2000));
+    const result = await postToServer("/work/save-session", { work: this.data });
+    if (stopReport.desactivate) {
+      Flash.notice(t("work.desactivated"));
+    } else {
+      this.dispatchData();
+      await new Promise((resolve2) => setTimeout(resolve2, 2000));
+    }
     Work.displayWork(result.next, result.options);
     if (result.ok) {
       Flash.success(t("times.saved"));

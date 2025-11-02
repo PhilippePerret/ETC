@@ -92,6 +92,7 @@ class DBWorks { /* singleton db */
     const request: string = `
       UPDATE works
       SET
+        active = ?,
         startedAt = ?,
         totalTime = ?,
         cycleTime = ?,
@@ -103,6 +104,7 @@ class DBWorks { /* singleton db */
         id = ?
     `;
     const data = [
+      dw.active,
       dw.startedAt,
       dw.totalTime,
       dw.cycleTime,
@@ -112,10 +114,16 @@ class DBWorks { /* singleton db */
       dw.report,
       dw.id
     ];
+    log.info("Request: ", request);
+    log.info("Data:", data);
     this.db.run(request, data as any);
 
-    // Actualisation de l'état du Cron (cf. la fonction)
-    if (dw.leftTime <= 0 && dw.cron){ this.updateCronAtOf(dw) }
+    // // Pour vérification, on relève la donnée
+    // const infos = this.db.query('SELECT * FROM works WHERE id = ?').get(dw.id);
+    // log.info("Data after: ", infos);
+
+    // Update cron last execution (cf. function)
+    if (dw.cron && dw.active === 0){ this.updateCronAtOf(dw) }
   }
 
   /**
@@ -124,6 +132,7 @@ class DBWorks { /* singleton db */
    * l'exécuter, il faut désactiver ce travail et enregistrer
    * la date de dernière échéance réalisée pour savoir quand 
    * déclencher la prochaine fois le travail.
+   * 
    * 
    * @param dw Les données complètes du travail
    */

@@ -83,6 +83,7 @@ ui:
     counter_mode: Counter Mode
     cycle: Cycle
     default_duration: Default duration
+    desactive_work: "This work is complete"
     elapsed_time: Elapsed time
     lang: Lang
     order: Order

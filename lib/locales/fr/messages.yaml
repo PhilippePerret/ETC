@@ -40,6 +40,7 @@ work:
   any_active: Aucune tâche active.
   saved: "Travaux enregistrés avec succès !"
   unchanged: "Aucun changement détecté, rien à enregistrer."
+  desactivated: "Le travail a été désactivé."
 times:
   dont_add_and_save: Je n'ai pas ajouté et sauvé les temps
   saved: Nouveaux temps enregistrés

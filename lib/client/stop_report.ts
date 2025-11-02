@@ -60,7 +60,7 @@ export class EndWorkReport {
    */
   onSave(ev: MouseEvent){
     this.close();
-    this.ok(this.getContent());
+    this.ok(this.getData());
     ev && stopEvent(ev);
     return false;
   }
@@ -79,7 +79,7 @@ export class EndWorkReport {
    * choisir.
    */
   onTemplate(ev: MouseEvent): boolean {
-    if ( this.getContent().length ) {
+    if ( this.contentField.value.length ) {
       Flash.error(t('report.empty_content'))
     } else {
       // TODO Pouvoir choisir parmi les templates proposé
@@ -88,7 +88,18 @@ export class EndWorkReport {
     return ev && stopEvent(ev);
   }
 
-  private getContent(){return this.contentField.value;}
+  /**
+   * Relève les données à enregistrer :
+   *  - texte du rapport
+   *  - désactivation ou non du travail
+   */
+  private getData(){
+    return {
+      content: this.contentField.value,
+      desactivate: (this.desactiveField.checked === true)
+    }
+  }
+
   private setContent(s: string){this.contentField.value = s;}
 
   private init(){
@@ -121,6 +132,9 @@ export class EndWorkReport {
   private get contentField(){
     return this._contfield || (this._contfield = DGet('textarea#ETR-report', this.obj));
   }
+  private get desactiveField(){
+    return this._desactfield || (this._desactfield = DGet('input#ETR-desactive-work', this.obj));
+  }
 
   private get obj(){
     return this._obj || (this._obj = DGet('div#ETR-container'))
@@ -128,6 +142,7 @@ export class EndWorkReport {
 
 
   private _contfield!: HTMLTextAreaElement;
+  private _desactfield!: HTMLInputElement;
   private _obj!: HTMLDivElement;
 
 
