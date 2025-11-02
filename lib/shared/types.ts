@@ -4,6 +4,7 @@ export interface ResultType {
   ok: boolean;
   error: string | undefined ;
   process: string;
+  message?: string;
 }
 
 export type RecType = {[x: string]: any};

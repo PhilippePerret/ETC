@@ -19,6 +19,7 @@ ui:
     not_anymore: Not anymore
     ok: OK
     ok_remove: "OK, remove"
+    open: Open
     open_min: open
     open_project: OPEN
     pause: PAUSE

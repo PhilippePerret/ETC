@@ -15,6 +15,10 @@ export function listenBtn(id: string, method: Function, container = document.bod
   DGet(`button.btn-${id}`, container).addEventListener("click", method);
 }
 
+export function listenChange(selector: string, method: Function, container = document.body) {
+  DGet(selector, container).addEventListener('change', method);
+}
+
 
 export async function postToServer(route: string, data: RecType){
   const controller = new AbortController();

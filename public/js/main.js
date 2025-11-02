@@ -3699,10 +3699,14 @@ var init_flash = () => {};
 var exports_utils = {};
 __export(exports_utils, {
   postToServer: () => postToServer,
+  listenChange: () => listenChange,
   listenBtn: () => listenBtn
 });
 function listenBtn(id, method, container = document.body) {
   DGet(`button.btn-${id}`, container).addEventListener("click", method);
+}
+function listenChange(selector, method, container = document.body) {
+  DGet(selector, container).addEventListener("change", method);
 }
 async function postToServer(route, data) {
   const controller = new AbortController;
@@ -24373,8 +24377,10 @@ class Editing {
         if (value) {
           value = value.split(" ").slice(0, 5).join(" ");
         }
+      } else if (prop === "folder") {
+        this.setButtonInvisibility(DGet(".btn-open-folder", obj), !!value);
       } else if (prop === "script") {
-        this.setBtnRunScriptVisibility(DGet(".btn-run-script", obj), !!value);
+        this.setButtonInvisibility(DGet(".btn-run-script", obj), !!value);
       }
       field.value = typeof value === "undefined" ? "" : value;
     });
@@ -24385,6 +24391,7 @@ class Editing {
     listenBtn("down", this.onDown.bind(this, owork), owork);
     listenBtn("remove", this.onRemove.bind(this, work), owork);
     listenBtn("run-script", this.onRunScript.bind(this, work), owork);
+    listenBtn("open-folder", this.onOpenFolder.bind(this, work), owork);
     owork.querySelectorAll('input[type="text"]').forEach((o) => {
       o.addEventListener("focus", () => {
         o.select();
@@ -24395,10 +24402,9 @@ class Editing {
       const actif = menuActive.value === "1";
       owork.classList[actif ? "remove" : "add"]("off");
     });
-    const fieldCron = DGet(".form-work-cron", owork);
-    fieldCron.addEventListener("change", this.onChangeCron.bind(this, fieldCron));
-    const fieldScript = DGet(".form-work-script", owork);
-    fieldScript.addEventListener("change", this.onChangeScript.bind(this, fieldScript));
+    listenChange(".form-work-cron", this.onChangeCron.bind(this), owork);
+    listenChange(".form-work-script", this.onChangeScript.bind(this), owork);
+    listenChange(".form-work-folder", this.onChangeFolder.bind(this), owork);
     const btnHelpCron = DGet("sup.to-help-cron", owork);
     help.listenOn(btnHelpCron, "cron");
   }
@@ -24416,9 +24422,19 @@ class Editing {
       }
     }
   }
+  async onOpenFolder(work, ev) {
+    if (work.folder) {
+      postToServer("/tool/open-folder", { process: "Editing.onOpenFolder", folder: work.folder });
+    } else {
+      Flash.error("error.no_folder_to_open_yet");
+    }
+  }
   async onRunScript(work, ev) {
     if (work.script) {
-      postToServer("/tool/run-script", { process: "Editing.onRunScript", script: work.script });
+      const retour = postToServer("/tool/run-script", { process: "Editing.onRunScript", script: work.script });
+      if (retour.ok && retour.message) {
+        Flash.notice(`${t("ui.text.script_return")}${t("ui.colon")}${retour.message}`);
+      }
     } else {
       Flash.error(t("error.no_script_to_run"));
     }
@@ -24479,15 +24495,23 @@ class Editing {
       dispField.innerHTML = idProjet;
     }
   }
-  onChangeScript(field, ev) {
-    const value = field.value.trim();
-    this.setBtnRunScriptVisibility(field.nextSibling, !!value);
+  onChangeFolder(ev) {
+    const field = ev.target;
+    const button = field.nextSibling;
+    const state = field.value.trim() !== "";
+    this.setButtonInvisibility(button, state);
   }
-  setBtnRunScriptVisibility(btn, state) {
-    console.log("[setBtnRunScriptVisibility] bouton, state", btn, state);
+  onChangeScript(ev) {
+    const field = ev.target;
+    const state = field.value.trim() !== "";
+    const button = field.nextSibling;
+    this.setButtonInvisibility(button, state);
+  }
+  setButtonInvisibility(btn, state) {
     btn.classList[state ? "remove" : "add"]("invisible");
   }
-  onChangeCron(field, ev) {
+  onChangeCron(ev) {
+    const field = ev.target;
     this.showNextTime(field);
   }
   showNextTime(field) {

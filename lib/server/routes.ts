@@ -199,35 +199,43 @@ export function setupRoutes(app: Express) {
 
   app.post('/tool/open-folder', (req, res) => {
     const dreq = req.body;
-    let result = {ok: true, error: ''};
+    let result: ResultType = {ok: true, error: undefined, process: dreq.process};
     if (existsSync(path.resolve(dreq.folder))) {
       try {
         execSync(`open -a Finder "${dreq.folder}"`);
       } catch(err: any) {
         console.error("ERREUR OUVERTURE FOLDER: ", err);
-        result = {ok: false, error: String(err.stderr)}
+        result.error = String(err.stderr)
       }
     } else {
-      result = {ok: false, error: 'Unfound folder ' + dreq.folder};
+      result.error = t('error.unfound_folder', [dreq.folder]);
     }
+    result.ok = result.error === undefined;
     res.json(result);
   });
 
   app.post('/tool/run-script', (req, res) => {
     const dreq = req.body;
-    let result = {ok: true, error: ''};
+    let result: ResultType = {
+      ok: true, 
+      error: undefined, 
+      process: dreq.process,
+      message: undefined
+    };
     dreq.script = path.resolve(dreq.script);
     // log.info("Je dois jouer le script", dreq.script);
     if (existsSync(dreq.script)) {
       try {
         const res = execFileSync(dreq.script, {encoding: 'utf8'});
         log.info("Résultat du script", res);
+        result.message = res;
       } catch(err: any) {
-        result = {ok: false, error: err.stderr}
+        result.error = err.stderr;
       }
     } else {
-      result = {ok: false, error: 'Script "'+dreq.script+'"unfound.'}
+      result.error =  t('error.unfound_script', [dreq.script]);
     }
+    result.ok = result.error === undefined;
     res.json(result);
   })
 

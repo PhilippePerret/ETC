@@ -3,11 +3,14 @@ space: ' '
 app:
   is_ready: L'application est prête.
 error:
+  no_folder_to_open_yet: "Aucun dossier à ouvrir, pour le moment."
   no_other_work_complete_that_one: "Aucun autre travail trouvé, vous devez finir celui-ci."
   no_script_to_run: "Aucun script à jouer…"
   occurred: "Une erreur est survenue : _0_"
   work_already_changed_today: "La tâche a déjà été changée aujourd'hui (une seule dérogation par jour…)."
   unfound_field: "Champ introuvable : _0_"
+  unfound_folder: "Impossible de trouver le dossier '_0_'."
+  unfound_script: "Le script '_0_' est introuvable."
   data:
     cron_invalid: "Le Cron est invalide. Faites-vous aider par le guru !"
     undefined_project: "Le titre du projet est requis."

@@ -19,6 +19,7 @@ ui:
     not_anymore: Non
     ok: OK
     ok_remove: "Oui, détruire"
+    open: Ouvrir
     open_min: ouvrir
     open_project: PROJET
     pause: ⏸

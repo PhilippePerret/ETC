@@ -3198,10 +3198,14 @@ var init_Locale = __esm(() => {
 var exports_utils = {};
 __export(exports_utils, {
   postToServer: () => postToServer,
+  listenChange: () => listenChange,
   listenBtn: () => listenBtn
 });
 function listenBtn(id, method, container = document.body) {
   DGet(`button.btn-${id}`, container).addEventListener("click", method);
+}
+function listenChange(selector, method, container = document.body) {
+  DGet(selector, container).addEventListener("change", method);
 }
 async function postToServer(route, data) {
   const controller = new AbortController;

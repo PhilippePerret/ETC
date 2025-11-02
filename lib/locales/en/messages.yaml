@@ -3,11 +3,14 @@ space: ''
 app:
   is_ready: App is ready.
 error:
+  no_folder_to_open_yet: "No folder to open, yet."
   no_other_work_complete_that_one: "No other works found. You must complete that one."
   no_script_to_run: "No script to run…"
   occurred: "An error occurred: _0_"
   work_already_changed_today: "Task has been already changed today (only one exemption per day…)."
   unfound_field: "Unfound field: _0_"
+  unfound_folder: "Unable to find folder '_0_'."
+  unfound_script: "Unable to find script _0_."
   data:
     cron_invalid: "Cron is invalid."
     undefined_project: "Project Title is required."
