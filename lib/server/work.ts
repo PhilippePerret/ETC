@@ -68,23 +68,10 @@ export class Work /* server */ {
     if (options.no_lasttime_constraint !== true) {
       filtre.push(`(lastWorkedAt IS NULL OR lastWorkedAt <= ${startOfToday()})`);
     }
-    let candidats = db.findAll(filtre.join(' AND '));
-    if (options.but) {
-      candidats = candidats.filter((work: WorkType) => work.id !== options.but)
-    }
-    console.log("candidats", candidats)
-    // Traitement en fonction du nombre de candidats
-    const candidatsCount = candidats.length;
-    if (candidatsCount > 0) {
-      if (candidatsCount === 1) {
-        return candidats[0] as WorkType;
-      } else if (prefs.data.random) {
-        return candidats[Math.floor(Math.random() * candidatsCount)] as WorkType;
-      } else if (prefs.data.shortest) {
-        return candidats[0] as WorkType;
-      } else {
-        return candidats.pop() as WorkType;
-      }
+    if (options.but) { filtre.push(`ID <> "${options.but}"`) }
+    let candidat: WorkType | undefined = db.getTodayCandidats(filtre.join(' AND '));
+    if ( candidat ) {
+      return candidat as WorkType;
     } else if (this.deuxiemeFois === false) {
       /* Traitement spécial en cas d'absence de candidats, pour
        * savoir s'il faut updater le cycle, etc.

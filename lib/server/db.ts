@@ -12,6 +12,26 @@ import { CronExpressionParser } from 'cron-parser';
 
 class DBWorks { /* singleton db */
 
+
+  /**
+   * @api
+   * Fonction la plus importante qui retourne le travail à 
+   * faire pour maintenant en fonction des +conditions+.
+   * 
+   * @returns Le travail à travailler
+   */
+  public getTodayCandidats(conditions: string): WorkType | undefined {
+    const request = `
+    SELECT * FROM (
+      SELECT * FROM works 
+        WHERE ${conditions}
+        ORDER BY leftTime DESC LIMIT 5
+    ) ORDER BY RANDOM() LIMIT 1;
+    `
+    return this.db.query(request).get() as WorkType | undefined;
+  }
+
+
   public exec(request: string, params?: any) {
     if (params) {
       return this.db.run(request, params);
@@ -217,11 +237,18 @@ class DBWorks { /* singleton db */
       SET
         cycleCount = cycleCount + 1,
         cycleTime = 0,
-        leftTime = defaultLeftTime
+        defaultLeftTime = CASE
+          WHEN defaultLeftTime IS NULL OR defaultLeftTime = 0 THEN ?
+          ELSE defaultLeftTime
+          END,
+        leftTime = CASE 
+          WHEN defaultLeftTime IS NULL OR defaultLeftTime = 0 THEN ?
+          ELSE defaultLeftTime
+          END
       WHERE
         active = 1
       `
-      this.db.run(request);
+      this.db.run(request, [prefs.data.duree, prefs.data.duree]);
       return {ok: true, error: undefined}
     } catch(err) {
       return {ok: false, error: (err as any).message}

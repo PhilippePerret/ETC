@@ -115,6 +115,7 @@ export class EndWorkReport {
   }
   private reset(){
     this.contentField.value = '';
+    this.changedlogField.value = '';
   }
 
   /**
