@@ -193,14 +193,14 @@ export function setupRoutes(app: Express) {
     const dreq = req.body;
     const fileExists: boolean = existsSync(dreq.file);
     res.json(Object.assign(dreq, {ok: true, fileExists: fileExists, error: ''}));
-  })
+  });
 
   app.post('/check/file-executable', (req, res) => {
     const dreq = req.body;
     const stats = statSync(dreq.file);
-    const isExecutable = !!(stats.mode & 0o111);
+    const isExecutable = !stats.isDirectory() && !!(stats.mode & 0o111);
     res.json(Object.assign(dreq, {ok: true, isExecutable, error: ''}));
-  })
+  });
 
   app.post('/tool/open-folder', (req, res) => {
     const dreq = req.body;
@@ -235,7 +235,7 @@ export function setupRoutes(app: Express) {
         log.info("Résultat du script", res);
         result.message = res;
       } catch(err: any) {
-        result.error = err.stderr;
+        result.error = `${err.message} | ${(res as any).stderr}`;
       }
     } else {
       result.error =  t('error.unfound_script', [dreq.script]);
