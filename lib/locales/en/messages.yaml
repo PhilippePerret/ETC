@@ -13,12 +13,13 @@ error:
   unfound_script: "Unable to find script _0_."
   data:
     cron_invalid: "Cron is invalid."
-    undefined_project: "Project Title is required."
-    id_exists: "_0_ ID is already in use."
     folder_required: "Folder of work is mandatory (cf. manual)."
     folder_unfound: "this folder of work is unfound."
-    script_unfound: "_0_ script is unfound."
+    id_exists: "_0_ ID is already in use."
+    script_button_name_to_long: "This button name is too long (25 max)."
     script_not_executable: "This script is not executable."
+    script_unfound: "_0_ script is unfound."
+    undefined_project: "Project Title is required."
 
     error_found: "Errors found: _0_."
 files:

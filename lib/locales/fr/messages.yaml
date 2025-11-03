@@ -13,13 +13,14 @@ error:
   unfound_script: "Le script '_0_' est introuvable."
   data:
     cron_invalid: "Le Cron est invalide. Faites-vous aider par le guru !"
-    undefined_project: "Le titre du projet est requis."
-    id_exists: "L’identifiant _0_ est déjà utilisé."
+    error_found: "Des erreurs ont été trouvées (_0_). Merci de les corriger ci-dessous."
     folder_required: "Un dossier du travail est requis (cf. manuel)"
     folder_unfound: "Ce dossier est introuvable."
-    script_unfound: "Ce script est introuvable."
+    id_exists: "L’identifiant _0_ est déjà utilisé."
+    script_button_name_to_long: "Ce nom de boutton est trop long (25 max)."
     script_not_executable: "Ce script n'est pas exécutable."
-    error_found: "Des erreurs ont été trouvées (_0_). Merci de les corriger ci-dessous."
+    script_unfound: "Ce script est introuvable."
+    undefined_project: "Le titre du projet est requis."
 
 files:
   unfound_at_path: "Fichier _0_ introuvable à '_1_'"

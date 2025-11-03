@@ -14,48 +14,7 @@
   <link rel="stylesheet" href="./css/tables.css"/>
 </head>
 <body>
-  <!--
 
-    SECTION DE L'AIDE 
-
-  -->
-
-  <section id="help" class="hidden">
-    <h2>t(ui.title.help)</h2>
-    <div id="help-content">
-
-    </div>
-    <footer>
-      <button class="btn-close-help small">t(ui.button.close)</button>
-    </footer>
-  </section>
-
-  <!--
-
-    STOP REPORT
-
-    Panneau pour écrire le RAPPORT D'ARRÊT DE SESSION 
-    (END-TASK-REPORT)
-  -->
-  <div id="ETR-container" class="hidden">
-    <h3>
-      <div id="ETR-explication"></div>
-      <img src="images/relais.jpg" alt="t(ui.text.baton_relais)" width="60"/>
-      <span>t(ui.title.stop_report)</span></h3>
-    <textarea id="ETR-report" placeholder="Todo reprise"></textarea>
-    <textarea id="ETR-changelog" placeholder="Changelog"></textarea>
-    <div class="buttons">
-      <div>
-        <input type="checkbox" id="ETR-desactive-work">
-        <label for="ETR-desactive-work">t(ui.text.desactive_work)</label>
-      </div>
-      <div>
-        <button class="btn-etr-dont-save fleft small">t(ui.button.dont_save_time_and_report)</button>
-        <button class="btn-etr-template">t(ui.button.use_template)</button>
-        <button class="btn-etr-save">t(ui.button.save)</button>
-      </div>
-    </div>
-  </div>
 
 
   <!--
@@ -109,6 +68,52 @@
     </footer>
 
   </section>
+
+
+  <!--
+
+    SECTION DE L'AIDE 
+
+  -->
+
+  <section id="help" class="hidden">
+    <h2>t(ui.title.help)</h2>
+    <div id="help-content">
+
+    </div>
+    <footer>
+      <button class="btn-close-help small">t(ui.button.close)</button>
+    </footer>
+  </section>
+
+
+  <!--
+
+    STOP REPORT
+
+    Panneau pour écrire le RAPPORT D'ARRÊT DE SESSION 
+    (END-TASK-REPORT)
+  -->
+  <div id="ETR-container" class="hidden">
+    <h3>
+      <div id="ETR-explication"></div>
+      <img src="images/relais.jpg" alt="t(ui.text.baton_relais)" width="60"/>
+      <span>t(ui.title.stop_report)</span></h3>
+    <textarea id="ETR-report" placeholder="Todo reprise"></textarea>
+    <textarea id="ETR-changelog" placeholder="Changelog"></textarea>
+    <div class="buttons">
+      <div>
+        <input type="checkbox" id="ETR-desactive-work">
+        <label for="ETR-desactive-work">t(ui.text.desactive_work)</label>
+      </div>
+      <div>
+        <button class="btn-etr-dont-save fleft small">t(ui.button.dont_save_time_and_report)</button>
+        <button class="btn-etr-template">t(ui.button.use_template)</button>
+        <button class="btn-etr-save">t(ui.button.save)</button>
+      </div>
+    </div>
+  </div>
+
 
 
   <!--
@@ -178,6 +183,7 @@
         <div class="row-flex">
           <label>t(ui.thing.Script_button_name)</label>
           <input type="text" class="form-work-scriptBtn" data-type="string"/>
+          <div class="form-work-scriptBtn-err err"></div>
         </div>
       </div>
       

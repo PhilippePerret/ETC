@@ -16553,6 +16553,7 @@ class Work {
     this.data = data;
   }
   updateData(newData) {
+    console.log("Nouvelle donnée du work current", newData);
     this.data = Object.assign(this.data, newData);
   }
   get id() {
@@ -16584,6 +16585,27 @@ class Work {
       runScript: !!this.data.script,
       openFolder: !!this.data.folder
     });
+    this.setScriptButton();
+  }
+  setScriptButton() {
+    if (!this.data.script) {
+      return;
+    }
+    const scriptBtnName = this.data.scriptBtn || t("ui.button.run");
+    const btnClass = function(name) {
+      const len = name.length;
+      if (len < 11)
+        return null;
+      else if (len < 23) {
+        return "double";
+      } else {
+        return "double_dim";
+      }
+    }(scriptBtnName);
+    const button = DGet("button#btn-runScript");
+    button.innerHTML = scriptBtnName;
+    button.classList.remove(...["double", "double_dim"]);
+    btnClass && button.classList.add(btnClass);
   }
   dispatchData() {
     Object.entries(this.data).forEach(([k, v]) => {

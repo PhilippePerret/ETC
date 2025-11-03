@@ -172,6 +172,15 @@ div#buttons-container div#row2 {
   margin-top: 0.5em;
 }
 
+div#buttons-container button#btn-runScript.double {
+  width:calc(2 * 140px + 0.5em)!important;
+}
+div#buttons-container button#btn-runScript.double_dim {
+  width:calc(2 * 140px + 0.5em)!important;
+  font-size: 10pt!important;
+  padding-left: 2px;
+  padding-right: 2px;
+}
 
 button.small {
   font-size: 0.75em;

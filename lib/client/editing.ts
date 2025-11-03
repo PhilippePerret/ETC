@@ -120,7 +120,7 @@ class Editing {
       const curWData = (collectedData as WorkType[]).find(w => w.id === curWId);
       const curWork = Work.currentWork;
       curWork.updateData(curWData as WorkType);
-      curWork.dispatchData();
+      curWork.display({});
     }
   }
 
@@ -233,6 +233,12 @@ class Editing {
             Object.assign(changeset.errors, {'script': t('error.data.script_not_executable', [newValue])});
             ++ errorCount;
           }
+        }
+        break;
+      case 'scriptBtn':
+        if (newValue.length > 25) {
+          Object.assign(changeset.errors, {'scriptBtn': t('error.data.script_button_name_to_long', [newValue])});
+          ++ errorCount;
         }
         break;
       case 'cron':
