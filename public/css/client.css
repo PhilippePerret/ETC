@@ -1,3 +1,11 @@
+body.dark {
+  --border-color: #777;
+}
+body.light {
+  --border-color: #848cb0;
+}
+
+
 body {
   font-size: 14pt;
   padding:2em;
@@ -20,6 +28,14 @@ textarea {
 .error, .error * {
   background-color: rgb(221, 148, 148)!important;
 }
+
+.border {
+  border: 1px solid var(--border-color);
+  padding: 0.3em;
+  margin-bottom: inherit;
+}
+.border > *:first-child { margin-top: 0 }
+.border > *:last-child  { margin-bottom: 0 }
 
 .w120 {width: 120px;}
 .w180 {width: 180px;}

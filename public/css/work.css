@@ -100,6 +100,7 @@ div.editing-form-work textarea.form-work-content:focus {
   height: 180px;
 }
 div.editing-form-work input.form-work-folder,
+div.editing-form-work input.form-work-scriptBtn,
 div.editing-form-work input.form-work-script {
   font-size: 11pt;
 }

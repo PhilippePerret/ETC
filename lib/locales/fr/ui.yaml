@@ -61,7 +61,7 @@ ui:
     minute: minute
     minutes: minutes
     Script: Script
-    Script_button_name: Script
+    Script_button_name: Nom bouton
     Theme: Thème
     Work: Travail
   adj:

@@ -7,14 +7,20 @@
 ### Présence des éléments
 
 - [ ] Il contient bien le travail courant avec ses données (titre, id, content, stop-report, todo, les temps)
+
 - [ ] Les boutons réagissent comme attendus
   - [ ] Le bouton "start" démarre le chronomètre
   - [ ] le bouton "stop" arrête le travail
   - [ ] le bouton "pause" met le travail en pause
   - [ ] le bouton « Projet » permet d’ouvrir le projet
   - [ ] le bouton « Change » permet de changer de travail
+  
+  le bouton « Script » peut porter le nom personnalisé
+  
 - [ ] le bouton « Préférences » ouvre le panneau des préférences
+
 - [ ] le bouton « Editing » ouvre la liste des travaux
+
 - [x] le bouton « Aide » ouvre la fenêtre de l’aide
 
 ### Fonctionnement
@@ -31,6 +37,8 @@
 - [ ] L’horloge s’affiche au démarrage
 
 - [ ] Les temps du travail se changent toutes les minutes
+
+- [ ] le bouton « Script » (ou autre nom personnalisé) permet de jouer le script
 
   
 
