@@ -11,6 +11,7 @@ error:
   unfound_field: "Unfound field: _0_"
   unfound_folder: "Unable to find folder '_0_'."
   unfound_script: "Unable to find script _0_."
+  unknown: 'unknown error'
   data:
     cron_invalid: "Cron is invalid."
     folder_required: "Folder of work is mandatory (cf. manual)."

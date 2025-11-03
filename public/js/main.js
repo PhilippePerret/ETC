@@ -3744,7 +3744,7 @@ async function postToServer(route, data) {
     clearTimeout(timeoutId);
   }
   if (response.ok === false) {
-    let error = response.error;
+    let error = response.error || t("error.unknown");
     if (error.match(" ") === null) {
       error = t.call(null, error);
     }

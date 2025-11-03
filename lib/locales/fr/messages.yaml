@@ -11,6 +11,7 @@ error:
   unfound_field: "Champ introuvable : _0_"
   unfound_folder: "Impossible de trouver le dossier '_0_'."
   unfound_script: "Le script '_0_' est introuvable."
+  unknown: 'erreur inconnue'
   data:
     cron_invalid: "Le Cron est invalide. Faites-vous aider par le guru !"
     error_found: "Des erreurs ont été trouvées (_0_). Merci de les corriger ci-dessous."
