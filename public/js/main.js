@@ -24143,6 +24143,7 @@ var DEFAULT_WORK = {
   folder: "/path/to/default",
   defaultLeftTime: 0,
   script: "",
+  scriptBtn: "",
   cron: "",
   cronedAt: null,
   nextCronDateAt: null,

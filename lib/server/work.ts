@@ -5,7 +5,7 @@ import { prefs } from "./prefs";
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
 import { t } from '../shared/Locale';
 import { startOfToday } from "../shared/utils_shared";
-import { writeFileSync } from "fs";
+import { existsSync, readFileSync, renameSync, unlinkSync, writeFile, writeFileSync } from "fs";
 
 export class Work /* server */ {
   public static defaultDuration: number;
@@ -22,14 +22,27 @@ export class Work /* server */ {
    * courant, on l'enregistre dans un fichier à la racine
    * du projet.
    */
-  public static saveChangelog(changelog: string, folder: string){
+  public static async saveChangelog(changelog: string, folder: string){
     const logpath = path.join(folder, 'CHANGELOG.md');
+    const provpath = path.join(folder, 'CHANGELOG~.md');
+    function replaceLog(){
+      existsSync(logpath) && unlinkSync(logpath);
+      renameSync(provpath, logpath);
+    }
     const code = `
-    # ${new Date().toLocaleDateString(prefs.data.lang)}
+    ### ${new Date().toLocaleDateString(prefs.data.lang)}
 
-    ${changelog}`
-    writeFileSync(logpath, code + "\n\n", {encoding: 'utf8'});
-    log.info("Enregistrement du changelog avec ", code);
+    ${changelog}\n\n`
+    writeFile(provpath, code + "\n\n", 'utf8', (error) => {
+      if (existsSync(logpath)) {
+        writeFile(provpath, readFileSync(logpath), 'utf8',
+          (err2) => { replaceLog() }
+        );
+      } else {
+        replaceLog();
+      }
+    });
+    log.info("Ajout du changelog dans %s", logpath);
   }
 
   private static prepareDefaultWork(dureeDefault: number){

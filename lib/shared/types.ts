@@ -22,6 +22,7 @@ export interface WorkType {
     content: string;
     folder: string; // Required (to watch activity)
     script?: string; // path du script de démarrage
+    scriptBtn?: string; // nom du bouton
     cron?: string;
     cronedAt: number | null;
     nextCronDateAt: number | null;
@@ -43,6 +44,7 @@ export const DEFAULT_WORK = {
   folder: '/path/to/default',
   defaultLeftTime: 0,
   script: '',
+  scriptBtn: '',
   cron: '',
   cronedAt: null,
   nextCronDateAt: null,
@@ -65,4 +67,5 @@ export interface PrefsDataType {
   shortest: boolean; 
   counter: 'clock' | 'countdown';
   lang: 'fr' | 'en';
+  scriptBtn?: string;
 }
