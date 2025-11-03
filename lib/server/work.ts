@@ -5,7 +5,7 @@ import { prefs } from "./prefs";
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
 import { t } from '../shared/Locale';
 import { startOfToday } from "../shared/utils_shared";
-import { existsSync, readFileSync, renameSync, unlinkSync, writeFile, writeFileSync } from "fs";
+import { appendFile, existsSync, readFileSync, renameSync, unlinkSync, writeFile, writeFileSync } from "fs";
 
 export class Work /* server */ {
   public static defaultDuration: number;
@@ -29,13 +29,10 @@ export class Work /* server */ {
       existsSync(logpath) && unlinkSync(logpath);
       renameSync(provpath, logpath);
     }
-    const code = `
-    ### ${new Date().toLocaleDateString(prefs.data.lang)}
-
-    ${changelog}\n\n`
-    writeFile(provpath, code + "\n\n", 'utf8', (error) => {
+    const code = `### ${new Date().toLocaleDateString(prefs.data.lang)}\n\n${changelog}\n\n`
+    writeFile(provpath, code, 'utf8', (error) => {
       if (existsSync(logpath)) {
-        writeFile(provpath, readFileSync(logpath), 'utf8',
+        appendFile(provpath, readFileSync(logpath), 'utf8',
           (err2) => { replaceLog() }
         );
       } else {
