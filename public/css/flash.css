@@ -31,7 +31,7 @@ div#flash-group div.flash-message:not(.error) {
 div#flash-group div#flash-error,
 div#flash-group div.flash-message.error,
  div#flash-group div.flash-message.warning {
-  background-color: rgb(227, 26, 26);
+  background-color: rgb(227, 26, 26)!important;
 }
 div#flash-group div#flash-info {
   background-color: rgb(19, 154, 184);
