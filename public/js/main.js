@@ -10746,7 +10746,7 @@ var require_dist = __commonJS((exports) => {
 });
 
 // lib/client/main.ts
-var import_renderer5 = __toESM(require_renderer2(), 1);
+var import_renderer6 = __toESM(require_renderer2(), 1);
 init_Locale();
 // lib/client/work.ts
 init_flash();
@@ -10801,7 +10801,8 @@ class EndWorkReport {
   }
   getData() {
     return {
-      content: this.contentField.value,
+      content: this.contentField.value.trim(),
+      changelog: this.changedlogField.value.trim(),
       desactivate: this.desactiveField.checked === true
     };
   }
@@ -10831,6 +10832,9 @@ class EndWorkReport {
   get contentField() {
     return this._contfield || (this._contfield = DGet("textarea#ETR-report", this.obj));
   }
+  get changedlogField() {
+    return this._logfield || (this._logfield = DGet("textarea#ETR-changelog", this.obj));
+  }
   get desactiveField() {
     return this._desactfield || (this._desactfield = DGet("input#ETR-desactive-work", this.obj));
   }
@@ -10838,6 +10842,7 @@ class EndWorkReport {
     return this._obj || (this._obj = DGet("div#ETR-container"));
   }
   _contfield;
+  _logfield;
   _desactfield;
   _obj;
   TEMPLATES = [
@@ -22848,6 +22853,7 @@ function markdown(md) {
 // lib/client/work.ts
 init_utils();
 init_Locale();
+var import_renderer = __toESM(require_renderer2(), 1);
 
 class Work {
   data;
@@ -22882,8 +22888,14 @@ class Work {
     }
     this.data.report = stopReport.content;
     this.data.active = stopReport.desactivate ? 0 : 1;
-    console.log("[addTimeAndSave] Enregistrement des temps et du rapport", this.data);
-    const result = await postToServer("/work/save-session", { work: this.data });
+    const changelog = stopReport.changelog;
+    const dataServer = {
+      process: "Work.addTimeAndSave",
+      work: this.data,
+      changelog
+    };
+    import_renderer.default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
+    const result = await postToServer("/work/save-session", dataServer);
     if (stopReport.desactivate) {
       Flash.notice(t("work.desactivated"));
     } else {
@@ -22972,7 +22984,7 @@ class Work {
             if (v2) {
               return markdown(`---
 
-# ${t("ui.title.stop_report")}
+### ${t("ui.title.stop_report")}
 
 ` + v2);
             } else {
@@ -22997,7 +23009,7 @@ class Work {
 init_utils();
 
 // lib/client/Dialog.ts
-var import_renderer = __toESM(require_renderer2(), 1);
+var import_renderer2 = __toESM(require_renderer2(), 1);
 
 class Dialog {
   data;
@@ -23026,7 +23038,7 @@ class Dialog {
     }
   }
   show(values2 = undefined) {
-    import_renderer.default.info("-> Dialog.show");
+    import_renderer2.default.info("-> Dialog.show");
     this._built || this.build();
     const detempCode = this.detemplatize(values2);
     this.box.classList.remove("hidden");
@@ -23034,10 +23046,10 @@ class Dialog {
     if (this.data.timeout) {
       this.timer = setTimeout(this.onTimeout.bind(this), this.data.timeout * 1000);
     }
-    import_renderer.default.info("<- Dialog.show");
+    import_renderer2.default.info("<- Dialog.show");
   }
   async showAsync(values2 = undefined) {
-    import_renderer.default.info("-> Dialog.showAsync");
+    import_renderer2.default.info("-> Dialog.showAsync");
     return new Promise((resolve2, _reject) => {
       this.resolve = resolve2;
       this.data.buttons.forEach((button) => {
@@ -23157,7 +23169,7 @@ class Dialog {
 
 // lib/client/activityTracker.ts
 init_Locale();
-var import_renderer2 = __toESM(require_renderer2(), 1);
+var import_renderer3 = __toESM(require_renderer2(), 1);
 
 class ActivityTracker {
   static CHECK_INTERVAL = 15 * 60 * 1000;
@@ -23182,15 +23194,15 @@ class ActivityTracker {
     }
   }
   static async control() {
-    import_renderer2.default.info("-> ActivityTracker.control");
+    import_renderer3.default.info("-> ActivityTracker.control");
     const result = await postToServer("/work/check-activity", {
       projectFolder: Work.currentWork.folder,
       lastCheck: Date.now() - this.CHECK_INTERVAL
     });
-    import_renderer2.default.info(`Retour de control: ${JSON.stringify(result)}`);
+    import_renderer3.default.info(`Retour de control: ${JSON.stringify(result)}`);
     if (result.ok) {
       if (result.isActive === false) {
-        import_renderer2.default.info("--- Activer la fenêtre de demande d’activité ---");
+        import_renderer3.default.info("--- Activer la fenêtre de demande d’activité ---");
         window.electronAPI.bringToFront();
         this.dialogActivity.show();
       }
@@ -23853,7 +23865,7 @@ class Tools {
 var tools = Tools.getInstance();
 
 // lib/client/prefs.ts
-var import_renderer3 = __toESM(require_renderer2(), 1);
+var import_renderer4 = __toESM(require_renderer2(), 1);
 
 class Prefs {
   data;
@@ -23866,7 +23878,7 @@ class Prefs {
   async init() {
     const retour = await postToServer("/prefs/load", { process: "Prefs.init" });
     if (retour.ok) {
-      import_renderer3.default.info("Prefs loaded", retour.prefs);
+      import_renderer4.default.info("Prefs loaded", retour.prefs);
       this.setData(retour.prefs);
       this.observeButtons();
     }
@@ -24149,7 +24161,7 @@ var WORK_PROPS = Object.keys(DEFAULT_WORK);
 init_flash();
 init_utils();
 init_Locale();
-var import_renderer4 = __toESM(require_renderer2(), 1);
+var import_renderer5 = __toESM(require_renderer2(), 1);
 var import_cron_parser = __toESM(require_dist(), 1);
 class Editing {
   originalWorks;
@@ -24176,8 +24188,8 @@ class Editing {
     const works = retour.works;
     const order2 = retour.order || works.map((w) => w.id);
     this.originalOrder = order2.join(":");
-    import_renderer4.default.info("Works retreaved", works);
-    import_renderer4.default.info("Order retreaved", order2);
+    import_renderer5.default.info("Works retreaved", works);
+    import_renderer5.default.info("Order retreaved", order2);
     this.originalWorks = {};
     works.forEach((w) => Object.assign(this.originalWorks, { [w.id]: w }));
     order2.forEach((workId) => {
@@ -24199,7 +24211,7 @@ class Editing {
       return;
     } else if (collectedData.length === 0 && this.orderHasNotChanged()) {
       Flash.notice(t("work.unchanged"));
-      import_renderer4.default.info("--- PAS D'ENREGISTREMENT ---");
+      import_renderer5.default.info("--- PAS D'ENREGISTREMENT ---");
       return;
     }
     const retour = await postToServer("/works/save", {
@@ -24258,7 +24270,7 @@ class Editing {
           console.error(`[collectTaskData] Unable to find (form) div#work-${idw} (idw = ${idw})…`);
         }
       }
-      import_renderer4.default.info("--- DES ERREURS SONT SURVENUES ---");
+      import_renderer5.default.info("--- DES ERREURS SONT SURVENUES ---");
       return null;
     } else {
       return Object.values(this.changesetWorks).filter((ch) => ch.count > 0).map((ch) => this.modifiedWorks[ch.id]);
@@ -24266,13 +24278,13 @@ class Editing {
   }
   async checkChangeset(changeset, errorCount) {
     const idw = changeset.id;
-    import_renderer4.default.info("Check des changements du travail ", idw, changeset.change);
+    import_renderer5.default.info("Check des changements du travail ", idw, changeset.change);
     if (changeset.count === 0) {
       return errorCount;
     }
     for (const prop of changeset.change) {
       let newValue = this.modifiedWorks[idw][prop];
-      import_renderer4.default.info("Check de prop '%s' de nouvelle valeur %s", prop, newValue);
+      import_renderer5.default.info("Check de prop '%s' de nouvelle valeur %s", prop, newValue);
       switch (prop) {
         case "project":
           if (newValue === "") {
@@ -24309,13 +24321,13 @@ class Editing {
         case "cron":
           if (newValue !== "") {
             try {
-              import_renderer4.default.info("Check de newValue", newValue);
+              import_renderer5.default.info("Check de newValue", newValue);
               if (newValue.split(" ").length === 5) {
                 newValue = `* ${newValue}`;
                 this.modifiedWorks[idw]["con"] = newValue;
               }
               const interval = import_cron_parser.CronExpressionParser.parse(newValue, { strict: true });
-              import_renderer4.default.info("Interval", interval.next());
+              import_renderer5.default.info("Interval", interval.next());
             } catch (error) {
               Object.assign(changeset.errors, { cron: t("error.data.cron_invalid", [newValue]) });
               ++errorCount;
@@ -24324,7 +24336,7 @@ class Editing {
           break;
       }
     }
-    import_renderer4.default.info("errorCount end checkChangeset: %i", errorCount);
+    import_renderer5.default.info("errorCount end checkChangeset: %i", errorCount);
     return errorCount;
   }
   async IDAlreadyExists(id) {
@@ -24617,7 +24629,7 @@ class Editing {
     if (this.isOriginalListDifferentFromCurrent()) {
       const retour = await this.closeConfirmDialog.showAsync();
       if (retour === "cancel") {
-        import_renderer4.default.info("Abandon de la fermeture");
+        import_renderer5.default.info("Abandon de la fermeture");
         return false;
       }
     } else {
@@ -24693,7 +24705,7 @@ var editor = Editing.singleton();
 // lib/client/main.ts
 class Client {
   async init() {
-    import_renderer5.default.info("=== INITIALISATION CLIENT ===");
+    import_renderer6.default.info("=== INITIALISATION CLIENT ===");
     await this.initObjet(prefs_default, "Prefs");
     await this.initObjet(loc, "Locale", prefs_default.getLang());
     this.initObjetSync(ui, "UI", prefs_default.getSavedData());
@@ -24710,7 +24722,7 @@ class Client {
     console.log("Il a répondu non");
   }
   initObjetSync(objet, name, args) {
-    import_renderer5.default.info(`${name} init…`);
+    import_renderer6.default.info(`${name} init…`);
     let res;
     if (args) {
       res = objet.init(args);
@@ -24718,13 +24730,13 @@ class Client {
       res = objet.init();
     }
     if (res) {
-      import_renderer5.default.info("  -- ok");
+      import_renderer6.default.info("  -- ok");
     } else {
-      import_renderer5.default.warn(`Problem with ${name} initialisation`);
+      import_renderer6.default.warn(`Problem with ${name} initialisation`);
     }
   }
   async initObjet(objet, name, args) {
-    import_renderer5.default.info(`${name} init…`);
+    import_renderer6.default.info(`${name} init…`);
     let res;
     if (args) {
       res = await objet.init(args);
@@ -24732,9 +24744,9 @@ class Client {
       res = await objet.init();
     }
     if (res) {
-      import_renderer5.default.info("  -- ok");
+      import_renderer6.default.info("  -- ok");
     } else {
-      import_renderer5.default.warn(`Problem with ${name} initialisation`);
+      import_renderer6.default.warn(`Problem with ${name} initialisation`);
     }
   }
   static inst;

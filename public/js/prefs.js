@@ -4416,7 +4416,8 @@ class EndWorkReport {
   }
   getData() {
     return {
-      content: this.contentField.value,
+      content: this.contentField.value.trim(),
+      changelog: this.changedlogField.value.trim(),
       desactivate: this.desactiveField.checked === true
     };
   }
@@ -4446,6 +4447,9 @@ class EndWorkReport {
   get contentField() {
     return this._contfield || (this._contfield = DGet("textarea#ETR-report", this.obj));
   }
+  get changedlogField() {
+    return this._logfield || (this._logfield = DGet("textarea#ETR-changelog", this.obj));
+  }
   get desactiveField() {
     return this._desactfield || (this._desactfield = DGet("input#ETR-desactive-work", this.obj));
   }
@@ -4453,6 +4457,7 @@ class EndWorkReport {
     return this._obj || (this._obj = DGet("div#ETR-container"));
   }
   _contfield;
+  _logfield;
   _desactfield;
   _obj;
   TEMPLATES = [
@@ -16463,6 +16468,7 @@ function markdown(md) {
 // lib/client/work.ts
 init_utils();
 init_Locale();
+var import_renderer = __toESM(require_renderer2(), 1);
 
 class Work {
   data;
@@ -16497,8 +16503,14 @@ class Work {
     }
     this.data.report = stopReport.content;
     this.data.active = stopReport.desactivate ? 0 : 1;
-    console.log("[addTimeAndSave] Enregistrement des temps et du rapport", this.data);
-    const result = await postToServer("/work/save-session", { work: this.data });
+    const changelog = stopReport.changelog;
+    const dataServer = {
+      process: "Work.addTimeAndSave",
+      work: this.data,
+      changelog
+    };
+    import_renderer.default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
+    const result = await postToServer("/work/save-session", dataServer);
     if (stopReport.desactivate) {
       Flash.notice(t("work.desactivated"));
     } else {
@@ -16587,7 +16599,7 @@ class Work {
             if (v2) {
               return markdown(`---
 
-# ${t("ui.title.stop_report")}
+### ${t("ui.title.stop_report")}
 
 ` + v2);
             } else {
@@ -16612,7 +16624,7 @@ class Work {
 init_utils();
 
 // lib/client/Dialog.ts
-var import_renderer = __toESM(require_renderer2(), 1);
+var import_renderer2 = __toESM(require_renderer2(), 1);
 
 class Dialog {
   data;
@@ -16641,7 +16653,7 @@ class Dialog {
     }
   }
   show(values2 = undefined) {
-    import_renderer.default.info("-> Dialog.show");
+    import_renderer2.default.info("-> Dialog.show");
     this._built || this.build();
     const detempCode = this.detemplatize(values2);
     this.box.classList.remove("hidden");
@@ -16649,10 +16661,10 @@ class Dialog {
     if (this.data.timeout) {
       this.timer = setTimeout(this.onTimeout.bind(this), this.data.timeout * 1000);
     }
-    import_renderer.default.info("<- Dialog.show");
+    import_renderer2.default.info("<- Dialog.show");
   }
   async showAsync(values2 = undefined) {
-    import_renderer.default.info("-> Dialog.showAsync");
+    import_renderer2.default.info("-> Dialog.showAsync");
     return new Promise((resolve2, _reject) => {
       this.resolve = resolve2;
       this.data.buttons.forEach((button) => {
@@ -16772,7 +16784,7 @@ class Dialog {
 
 // lib/client/activityTracker.ts
 init_Locale();
-var import_renderer2 = __toESM(require_renderer2(), 1);
+var import_renderer3 = __toESM(require_renderer2(), 1);
 
 class ActivityTracker {
   static CHECK_INTERVAL = 15 * 60 * 1000;
@@ -16797,15 +16809,15 @@ class ActivityTracker {
     }
   }
   static async control() {
-    import_renderer2.default.info("-> ActivityTracker.control");
+    import_renderer3.default.info("-> ActivityTracker.control");
     const result = await postToServer("/work/check-activity", {
       projectFolder: Work.currentWork.folder,
       lastCheck: Date.now() - this.CHECK_INTERVAL
     });
-    import_renderer2.default.info(`Retour de control: ${JSON.stringify(result)}`);
+    import_renderer3.default.info(`Retour de control: ${JSON.stringify(result)}`);
     if (result.ok) {
       if (result.isActive === false) {
-        import_renderer2.default.info("--- Activer la fenêtre de demande d’activité ---");
+        import_renderer3.default.info("--- Activer la fenêtre de demande d’activité ---");
         window.electronAPI.bringToFront();
         this.dialogActivity.show();
       }
@@ -17468,7 +17480,7 @@ class Tools {
 var tools = Tools.getInstance();
 
 // lib/client/prefs.ts
-var import_renderer3 = __toESM(require_renderer2(), 1);
+var import_renderer4 = __toESM(require_renderer2(), 1);
 
 class Prefs {
   data;
@@ -17481,7 +17493,7 @@ class Prefs {
   async init() {
     const retour = await postToServer("/prefs/load", { process: "Prefs.init" });
     if (retour.ok) {
-      import_renderer3.default.info("Prefs loaded", retour.prefs);
+      import_renderer4.default.info("Prefs loaded", retour.prefs);
       this.setData(retour.prefs);
       this.observeButtons();
     }

@@ -7,7 +7,7 @@ import { EndWorkReport } from "./stop_report";
 import { markdown } from "../shared/utils_shared";
 import { postToServer } from "./utils";
 import { t } from "../shared/Locale";
-import type { RecordWithTtl } from "dns";
+import log from "electron-log/renderer";
 
 export class Work {
 
@@ -60,8 +60,13 @@ export class Work {
     this.data.report = stopReport.content as string;
     this.data.active = stopReport.desactivate ? 0 : 1;
     const changelog = stopReport.changelog as string;
-    console.log("[addTimeAndSave] Enregistrement des temps et du rapport", this.data);
-    const result: RecType = await postToServer('/work/save-session', {work: this.data, changelog});
+    const dataServer = {
+      process: 'Work.addTimeAndSave',
+      work: this.data, 
+      changelog: changelog
+    };
+    log.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
+    const result: RecType = await postToServer('/work/save-session', dataServer);
     // console.log("Retour save session: ", result);
     // On actualise l'affichage pour apercevoir les nouveaux temps
     // pendant 2 secondes puis on passe à la tâche suivante, qui a
@@ -165,7 +170,7 @@ export class Work {
             return markdown(v);
           case 'report':
             if ( v ) {
-              return markdown(`---\n\n# ${t('ui.title.stop_report')}\n\n` + v);
+              return markdown(`---\n\n### ${t('ui.title.stop_report')}\n\n` + v);
             } else { return '' }
           default: 
             return v;
