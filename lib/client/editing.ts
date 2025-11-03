@@ -65,6 +65,22 @@ class Editing {
     this.setWorksCount()
   }
 
+
+  /**
+   * Pour finir l'édition et revenir au panneau principal
+   * 
+   * Mais on doit vérifier qu'aucune chose ne soit à enregistrer,
+   * une nouvelle tâche, une suppression de tâche ou autre. Pour
+   * ce faire, on compare la liste originale avec la liste actuelle.
+   */
+  async stopEditing(){
+    console.log("-> stopEditing")
+    if (await this.enableToStopEditing()) {
+      ui.toggleSection('work');
+    }
+    console.log("<- stopEditing")
+  }
+
   private setWorksCount(){
     const counts = [0, 0];
     this.workContainer.querySelectorAll('select.form-work-active').forEach((s: HTMLSelectElement) => {
@@ -356,6 +372,8 @@ class Editing {
     });
     DGet('span.work-id-disp', obj).innerHTML = work.id;
   }
+
+
   private observeWorkForm(owork: HTMLDivElement, work: WorkType){
     listenBtn('up', this.onUp.bind(this, owork), owork);
     listenBtn('down', this.onDown.bind(this, owork), owork);
@@ -606,20 +624,6 @@ class Editing {
   }
 
   // 
-  /**
-   * Pour finir l'édition et revenir au panneau principal
-   * 
-   * Mais on doit vérifier qu'aucune chose ne soit à enregistrer,
-   * une nouvelle tâche, une suppression de tâche ou autre. Pour
-   * ce faire, on compare la liste originale avec la liste actuelle.
-   */
-  async stopEditing(){
-    console.log("-> stopEditing")
-    if (await this.enableToStopEditing()) {
-      ui.toggleSection('work');
-    }
-    console.log("<- stopEditing")
-  }
 
   async enableToStopEditing(): Promise<boolean> {
     if (this.isOriginalListDifferentFromCurrent()){

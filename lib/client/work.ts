@@ -148,11 +148,12 @@ export class Work {
     // Disptach des données
     this.dispatchData();
     // Réglage des boutons
+    console.log("Clock state", clock.state);
     ui.showButtons({
-      Start: true,
-      Restart: false,
-      Stop: false,
-      Pause: false,
+      Start: clock.state === 'stopped',
+      Restart: clock.state === 'paused',
+      Stop: clock.state !== 'stopped',
+      Pause: clock.state === 'running',
       Change: options.canChange,
       runScript: !!this.data.script,
       openFolder: !!this.data.folder,

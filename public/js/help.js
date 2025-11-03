@@ -4370,12 +4370,13 @@ var require_renderer2 = __commonJS((exports, module) => {
 init_flash();
 
 class Clock {
-  static getInstance() {
+  static singleton() {
     return this._instance || (this._instance = new Clock);
   }
   static _instance;
   constructor() {}
   counterMode;
+  state = "stopped";
   time2horloge(mn) {
     let hrs = Math.floor(mn / 60);
     let mns = Math.round(mn % 60);
@@ -4443,6 +4444,7 @@ class Clock {
   startTimer() {
     this.startTime = this.getTime();
     this.timer = setInterval(this.run.bind(this), 1000);
+    this.state = "running";
   }
   createTimeSegment() {
     this.currentTimeSegment = { beg: this.getTime(), end: undefined, laps: undefined };
@@ -4461,12 +4463,14 @@ class Clock {
   pause() {
     this.endCurrentTimeSegment();
     clearInterval(this.timer);
+    this.state = "paused";
   }
   stop() {
     clearInterval(this.timer);
     delete this.timer;
     this.endCurrentTimeSegment();
     this.clockContainer.classList.add("hidden");
+    this.state = "stopped";
     return this.totalTime;
   }
   run() {
@@ -4544,7 +4548,7 @@ class Clock {
   _cycledurfield;
   _totalfield;
 }
-var clock = Clock.getInstance();
+var clock = Clock.singleton();
 
 // lib/client/work.ts
 init_flash();
@@ -4619,6 +4623,7 @@ class EndWorkReport {
   }
   reset() {
     this.contentField.value = "";
+    this.changedlogField.value = "";
   }
   show() {
     this.obj.classList.remove("hidden");
@@ -16676,7 +16681,7 @@ class Work {
     }
     if (this.data.cycleCount === 0) {
       this.data.cycleCount = 1;
-      this.data.startedAt = clock.getStartTime() * 1000;
+      this.data.startedAt = this.data.startedAt || clock.getStartTime() * 1000;
     }
     this.data.lastWorkedAt = clock.getStartTime() * 1000;
     const stopReport = await new EndWorkReport(this).writeReport();
@@ -16759,11 +16764,12 @@ class Work {
   }
   display(options) {
     this.dispatchData();
+    console.log("Clock state", clock.state);
     ui.showButtons({
-      Start: true,
-      Restart: false,
-      Stop: false,
-      Pause: false,
+      Start: clock.state === "stopped",
+      Restart: clock.state === "paused",
+      Stop: clock.state !== "stopped",
+      Pause: clock.state === "running",
       Change: options.canChange,
       runScript: !!this.data.script,
       openFolder: !!this.data.folder
@@ -17142,6 +17148,7 @@ class UI {
     eList.forEach((e) => e.obj.classList.remove("hidden"));
   }
   showButtons(states) {
+    console.log("[ui.showButtons] states", states);
     this.buttons.forEach((bouton) => bouton.setState(states[bouton.id]));
   }
   closeSection(name) {
@@ -17195,7 +17202,7 @@ class UI {
   }
   _buttons;
   instancieButtons() {
-    console.log("-> Instanciation des boutons");
+    console.log("-> Création des boutons");
     this._buttons = this.DATA_BUTTONS.map((bdata) => {
       let id, name, onclick, hidden, row, title;
       [id, name, onclick, hidden, row, title] = bdata;

@@ -9,16 +9,17 @@ interface TimeSegment {
   laps?: number; // durée de ce segment
 }
 
-type CounterModeType = 'clock' | 'countdown'
+type CounterModeType = 'clock' | 'countdown';
+type CounterStateType = 'running' | 'paused' | 'stopped';
 
+class Clock { /* singleton clock */
 
-class Clock {
-
-  public static getInstance(){return this._instance || (this._instance = new Clock())}
+  public static singleton(){return this._instance || (this._instance = new Clock())}
   private static _instance: Clock;
   private constructor(){}
 
   private counterMode!: CounterModeType ;
+  public state: CounterStateType = 'stopped';
 
   // Reçoit des minutes est retourne "x h y’"
   public time2horloge(mn: number) {
@@ -118,6 +119,7 @@ class Clock {
   private startTimer(){
     this.startTime = this.getTime() ;
     this.timer = setInterval(this.run.bind(this), 1000);
+    this.state = 'running';
   }
   
   private createTimeSegment(){
@@ -137,6 +139,7 @@ class Clock {
   public pause(){
     this.endCurrentTimeSegment();
     clearInterval(this.timer);
+    this.state = 'paused';
   }
 
   /**
@@ -151,6 +154,7 @@ class Clock {
     delete (this as any).timer;
     this.endCurrentTimeSegment();
     this.clockContainer.classList.add('hidden');
+    this.state = 'stopped';
     return this.totalTime;
   }
 
@@ -250,4 +254,4 @@ class Clock {
   private _totalfield!: HTMLSpanElement;
 }
 
-export const clock = Clock.getInstance();
+export const clock = Clock.singleton();

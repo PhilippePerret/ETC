@@ -108,7 +108,7 @@ export class UI {
       } else {
         this.closeSection(section);
       }
-    })
+    });
   }
 
   /**
@@ -139,7 +139,7 @@ export class UI {
   }
 
   public showButtons(states: {[x: string]: boolean}):void {
-    // console.log("states", states);
+    console.log("[ui.showButtons] states", states);
     this.buttons.forEach((bouton: Button) => bouton.setState(states[bouton.id] as boolean));
   };
   
@@ -212,7 +212,7 @@ export class UI {
   }; private _buttons!: Button[];
 
   private instancieButtons(){
-    console.log("-> Instanciation des boutons");
+    console.log("-> Création des boutons");
     this._buttons = this.DATA_BUTTONS.map((bdata: any[]) => {
       let id: string, name: string, onclick: Function, hidden: boolean, row: 1 | 2, title: string;
       [id, name, onclick, hidden, row, title] = bdata;
