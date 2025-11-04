@@ -1,0 +1,9 @@
+Refactoring ActivityTracker
+=========================
+
+2025-11-04:
+- Déplacement de isUserWorkingOnProject depuis activityTracker.ts vers ActivityTracker_watcher.ts
+- Suppression de l'import circulaire qui compliquait l'architecture
+- Le watcher est maintenant autonome et contient toute la logique de surveillance des fichiers
+- Bug identifié et corrigé dans isUserWorkingOnProject : logique d'ajout au checkedPaths défaillante empêchait parcours récursif complet
+- Surveillance d'activité maintenant fonctionnelle, détecte correctement l'activité dans tous les sous-dossiers

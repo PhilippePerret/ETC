@@ -6,7 +6,6 @@
  */
 import fs from 'fs';
 import path from 'path';
-import log from 'electron-log/main';
 
 const fileWatcher = new Worker(path.join(__dirname, 'ActivityTracker_watcher.ts'));
 
@@ -30,22 +29,36 @@ export class ActivityTracker /* SERVER */ { /* singleton */
    */
   public watchActivity(folder: string, lastCheckAt: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
+
+      const listen = (eventName: keyof WorkerEventMap, fallback: any) => {
+        this.watcher.addEventListener(eventName, fallback);
+      };
+      const unlisten = (eventName: keyof WorkerEventMap, fallback: any) => {
+        this.watcher.removeEventListener(eventName, fallback);
+      };
+      const doResolve = (eventName: keyof WorkerEventMap, fallback: any, data: any) => {
+        unlisten(eventName, fallback);
+        resolve(data);
+      }
+      const doReject = (eventName: keyof WorkerEventMap, fallback: any, error: string) => {
+        unlisten(eventName, fallback);
+        reject(new Error(error));
+      }
+
       const handler = (event: MessageEvent) => {
-        this.watcher.removeEventListener('message', handler);
-        resolve(event.data.active);
+        doResolve('message', handler, event.data.active);
       };
       const errorHandler = (event: ErrorEvent) => {
-        this.watcher.removeEventListener('error', errorHandler);
-        reject(new Error(event.message || 'Worker unknown error'));
+        doReject('error', errorHandler, event.message || 'Worker unknown error');
       };
       const messageErrorHandler = (event: MessageEvent) => {
-        this.watcher.removeEventListener('messageerror', messageErrorHandler);
-        reject(new Error(event.data || 'Worker unknown message error'));
+        doReject('messageerror', messageErrorHandler, event.data || 'Worker unknown message error');
       };
 
-      this.watcher.addEventListener('error', errorHandler);
-      this.watcher.addEventListener('messageerror', messageErrorHandler);
-      this.watcher.addEventListener('message', handler);
+      listen('error', errorHandler);
+      listen('messageerror', messageErrorHandler);
+      listen('message', handler);
+
       this.watcher.postMessage({ folder, lastCheckAt });
     });
   }
@@ -56,103 +69,3 @@ export class ActivityTracker /* SERVER */ { /* singleton */
 
 export const activTracker = ActivityTracker.singleton();
 
-/**
- * @api
- * 
- * Vérifie que l'utilisateur est encore en train de travailler sur
- * son projet et renvoie True le cas échéant. False otherwise.
- * 
- * @param folder Path du dossier du projet
- * @param lastCheckAt Date de dernier check (par défaut : il y a 15 minutes)
- */
-export function isUserWorkingOnProject(folder: string, lastCheckAt: number): boolean {
-  
-  const checkedPaths = new Set();
-
-  /**
-   * Vérifie si le fichier/dossier +hpath+ a été modifié depuis la
-   * dernière date de vérification.
-   * 
-   * @param hpath Full real path of the file to check
-   * @param date Of the last check
-   */
-  function hasBeenModifiedSince(stats: fs.Stats, lastCheck: number): boolean {
-    return stats.mtimeMs > lastCheck ;
-  }
-
-  /**
-   * Résoud les liens symboliques (if any)
-   */
-  function hardPathOf(folder:string, dirent: fs.Dirent): string | undefined {
-    const fullPath = path.join(folder, String(dirent.name));
-    if (dirent.isSymbolicLink()) {
-      try {
-        const target: string = fs.readlinkSync(fullPath);
-        return path.resolve(folder, target);      
-      } catch(error) {
-        console.error('Unable to read link of ' + fullPath);
-        return ;
-      }
-    } else {
-      return fullPath; 
-    }
-  }
-
-  /**
-   * Fouille le dossier +folder+ pour trouver un premier élément 
-   * modifié depuis la dernière date de check.
-   * 
-   * @param folder Path du dossier
-   * @returns null | string (chemin d'accès au fichier modifié)
-   */
-  function traverseFolder(folder: string): null | string {
-    if ( checkedPaths.has(folder) ) { return null } 
-    else { checkedPaths.add(folder) }
-    let entries: fs.Dirent[];
-    let found: null | string;
-    let stats: fs.Stats;
-    try {
-      entries = fs.readdirSync(folder, { withFileTypes: true });
-    } catch(error) {
-      console.error(`Unable to read '${folder}' directory…`)
-      return null;
-    }
-    // Loop on all entries
-    for (const entry of entries) {
-      const hardPath: string | undefined = hardPathOf(folder, entry);
-      if (undefined === hardPath) continue; // erreur
-      if ( checkedPaths.has(hardPath) ) { continue } else { checkedPaths.add(hardPath) }
-      try {
-        stats = fs.statSync(hardPath);
-      } catch(error) {
-        console.error('Unable to read stat of ' + hardPath);
-        continue;
-      }
-      if (hasBeenModifiedSince(stats, lastCheckAt)) { 
-        return hardPath; 
-      } else if (stats.isDirectory()) {
-        if ( (found = traverseFolder(hardPath)) ) { return found; }
-      }
-    }
-    return null;
-  }
-  return !!traverseFolder(folder) ;
-}
-
-
-/* (ajouter un "/" devant pour effectuer le TEST)
-// TEST
-// ----
-// Toucher (touch) ce fichier pour que le test passe
-
-const folderPath = path.resolve('.');
-console.log("Dossier: %s", folderPath);
-const ilya15mns = new Date().getTime() - 15 * 60 * 1000;
-console.log("Dernier check = %i", ilya15mns, new Date(ilya15mns));
-if ( isUserWorkingOnProject(folderPath, ilya15mns) ) {
-  console.log("OK");
-} else {
-  console.error("Le test aurait dû retourner true")
-}
-
-//*/

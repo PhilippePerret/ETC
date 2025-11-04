@@ -1,9 +1,10 @@
 // lib/ActivityTracker_worker.ts
-import { isUserWorkingOnProject } from './activityTracker';
+import log from 'electron-log/main';
+import { isUserWorkingOnProject } from './Activity_isUserWorking';
 
 self.addEventListener('message', (event: MessageEvent) => {
   const { folder, lastCheckAt } = event.data;
   const isActive = isUserWorkingOnProject(folder, lastCheckAt);
-  console.log('Worker - isActive:', isActive);
+  log.info('Worker - isActive:', isActive);
   self.postMessage({ active: isActive });
 });
