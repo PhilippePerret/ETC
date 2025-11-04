@@ -75,7 +75,7 @@ export class UI {
     }
   }
 
-  private onPause(ev: Event){
+  private onPause(ev: Event | undefined){
     this.mask([this.btnPause]);
     this.reveal([this.btnRestart]);
     ActivityTracker.stopControl();
@@ -167,7 +167,13 @@ export class UI {
    * 
    * @api
    */
-  public onForceStop(){ this.onStop(undefined) }
+  public onForceStop(){ 
+    this.onStop(undefined) 
+  }
+
+  public onForcePause(){
+    this.onPause(undefined);
+  }
 
   // Méthode appelée pour changer de tâche courante
   private async onChange(ev: Event){

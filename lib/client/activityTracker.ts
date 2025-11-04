@@ -58,8 +58,24 @@ export class ActivityTracker /* CLIENT */ {
     }
   }
 
-  public static onChooseActivityState(isActive: boolean) {
-    if (isActive === false) { ui.onForceStop() }
+  /**
+   * Fonction qui reçoit le résultat de la demande de continuité
+   * d'activité lorsque l'inactivité a été détectée.
+   * Soit l'user dit qu'il est toujours sur le travail (rien à
+   * faire), soit il dit qu'il a terminé (on force le stop) soit
+   * il ne répond rien et l'interface est alors mise en pause.
+   * 
+   * @param state État choisi ou automatique
+   */
+  public static onChooseActivityState(state: 'actif' | 'force_stop' | 'force_pause'): void {
+    switch(state) {
+      case 'actif': 
+        break;
+      case 'force_pause':
+        ui.onForcePause(); break;
+      case 'force_stop':
+        ui.onForceStop(); break;
+    }
   }
 
   private static _dialactiv: Dialog;
@@ -68,11 +84,11 @@ export class ActivityTracker /* CLIENT */ {
       title: t('ui.title.confirmation_required'),
       message: t('ui.text.are_you_still_working'),
       buttons: [
-        {text: t('ui.button.not_anymore'), role: 'cancel', onclick: this.onChooseActivityState.bind(this, false)},
-        {text: t('ui.button.yes_still'), role: 'default', onclick: this.onChooseActivityState.bind(this, true)}
+        {text: t('ui.button.not_anymore'), role: 'cancel', onclick: this.onChooseActivityState.bind(this, 'force_stop')},
+        {text: t('ui.button.yes_still'), role: 'default', onclick: this.onChooseActivityState.bind(this, 'actif')}
       ],
       timeout: 120,
-      onTimeout: this.onChooseActivityState.bind(this, false),
+      onTimeout: this.onChooseActivityState.bind(this, 'force_pause'),
       icon: 'images/icon.png'
     }))
   }

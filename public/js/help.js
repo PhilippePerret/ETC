@@ -4375,8 +4375,16 @@ class Clock {
   }
   static _instance;
   constructor() {}
+  alerte10minsDone = false;
+  alerteWorkDone = false;
   counterMode;
   state = "stopped";
+  reset() {
+    this.alerteWorkDone = false;
+    this.alerte10minsDone = false;
+    ui.setBackgroundColorAt("");
+    this.timeSegments = [];
+  }
   time2horloge(mn) {
     let hrs = Math.floor(mn / 60);
     let mns = Math.round(mn % 60);
@@ -4415,7 +4423,7 @@ class Clock {
   }
   start(currentWork) {
     this.currentWork = currentWork;
-    this.timeSegments = [];
+    this.reset();
     this.clockContainer.classList.remove("hidden");
     this.clockObj.innerHTML = this.startClockPerCounterMode();
     this.createTimeSegment();
@@ -4508,8 +4516,6 @@ class Clock {
   get totalTimeField() {
     return this._totalfield || (this._totalfield = DGet("span#current-work-totalTime"));
   }
-  alerte10minsDone = false;
-  alerteWorkDone = false;
   donneAlerte10mins() {
     ui.setBackgroundColorAt("orange");
     this.bringAppToFront();
@@ -4517,6 +4523,7 @@ class Clock {
     this.alerte10minsDone = true;
   }
   donneAlerteWorkDone() {
+    ui.setBackgroundColorAt("rouge");
     this.bringAppToFront();
     Flash.notice("Work time is over. Please move on to the next work.");
     this.alerteWorkDone = true;
@@ -16775,6 +16782,7 @@ class Work {
       openFolder: !!this.data.folder
     });
     this.setScriptButton();
+    clock.reset();
   }
   setScriptButton() {
     if (!this.data.script) {
@@ -17034,9 +17042,16 @@ class ActivityTracker {
       }
     }
   }
-  static onChooseActivityState(isActive) {
-    if (isActive === false) {
-      ui.onForceStop();
+  static onChooseActivityState(state) {
+    switch (state) {
+      case "actif":
+        break;
+      case "force_pause":
+        ui.onForcePause();
+        break;
+      case "force_stop":
+        ui.onForceStop();
+        break;
     }
   }
   static _dialactiv;
@@ -17045,11 +17060,11 @@ class ActivityTracker {
       title: t("ui.title.confirmation_required"),
       message: t("ui.text.are_you_still_working"),
       buttons: [
-        { text: t("ui.button.not_anymore"), role: "cancel", onclick: this.onChooseActivityState.bind(this, false) },
-        { text: t("ui.button.yes_still"), role: "default", onclick: this.onChooseActivityState.bind(this, true) }
+        { text: t("ui.button.not_anymore"), role: "cancel", onclick: this.onChooseActivityState.bind(this, "force_stop") },
+        { text: t("ui.button.yes_still"), role: "default", onclick: this.onChooseActivityState.bind(this, "actif") }
       ],
       timeout: 120,
-      onTimeout: this.onChooseActivityState.bind(this, false),
+      onTimeout: this.onChooseActivityState.bind(this, "force_pause"),
       icon: "images/icon.png"
     }));
   }
@@ -17159,6 +17174,9 @@ class UI {
   }
   onForceStop() {
     this.onStop(undefined);
+  }
+  onForcePause() {
+    this.onPause(undefined);
   }
   async onChange(ev) {
     ev && stopEvent2(ev);
