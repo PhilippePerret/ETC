@@ -159,6 +159,8 @@ export class Work {
       openFolder: !!this.data.folder,
     });
     this.setScriptButton()
+    // Surtout pour supprimer le fond (orange/rouge) précédent
+    clock.reset();
   }
 
   /**

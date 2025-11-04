@@ -17,9 +17,26 @@ class Clock { /* singleton clock */
   public static singleton(){return this._instance || (this._instance = new Clock())}
   private static _instance: Clock;
   private constructor(){}
+  private alerte10minsDone: boolean = false;
+  private alerteWorkDone: boolean = false;
 
   private counterMode!: CounterModeType ;
   public state: CounterStateType = 'stopped';
+
+  /**
+   * Réinitialise pour le prochain travail.
+   * 
+   * Par prudence (et pour remettre l'interface au début),
+   * cette méthode est appelée quand on clique sur le 
+   * bouton "START" et quand on affiche le travail courant.
+   */
+  public reset(){
+    this.alerteWorkDone = false;
+    this.alerte10minsDone = false;
+    ui.setBackgroundColorAt('');
+    this.timeSegments = [];
+  }
+
 
   // Reçoit des minutes est retourne "x h y’"
   public time2horloge(mn: number) {
@@ -64,6 +81,7 @@ class Clock { /* singleton clock */
   private currentTimeSegment!: TimeSegment;
   private timeSegments: TimeSegment[] = [];
 
+  // Retourne le temps courant en secondes
   private getTime(){ return Math.round(new Date().getTime() / 1000) }
 
   /**
@@ -72,7 +90,7 @@ class Clock { /* singleton clock */
   public start(currentWork: Work){
     this.currentWork = currentWork;
     // console.log("Démarrage de l'horloge");
-    this.timeSegments = [];
+    this.reset();
     this.clockContainer.classList.remove('hidden');
     this.clockObj.innerHTML = this.startClockPerCounterMode();
     this.createTimeSegment();
@@ -125,6 +143,9 @@ class Clock { /* singleton clock */
   private createTimeSegment(){
     this.currentTimeSegment = {beg: this.getTime(), end: undefined, laps: undefined}
   }
+
+  // Quand on pause ou qu'on stoppe, il faut terminer le
+  // segment de temps courant.
   private endCurrentTimeSegment(){
     const end = this.getTime();
     const laps = end - this.currentTimeSegment.beg;
@@ -180,6 +201,10 @@ class Clock { /* singleton clock */
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
     /****************************************/
+
+    /*****************************************************
+     * ALERTE SI LE TEMPS DE FIN APPROCHE OU EST ARRIVÉ  *
+     *****************************************************/
     // console.log("leftTime = %i", leftTime);
     if ( leftTime < 10 && this.alerte10minsDone === false) {
       // 10 minutes restantes sur ce travail
@@ -187,11 +212,15 @@ class Clock { /* singleton clock */
     } else if (this.alerte10minsDone) {
       // L'alerte des 10 minutes a été donnée
       if (this.alerteWorkDone === false && leftTime < 0) {
+        /****************************
+         * Temps de travail atteint *
+         ****************************/
         // Temps de travail atteint, alerte pour avertir l'user
         this.donneAlerteWorkDone()
       }
     }
-  }; 
+  };
+
   private get restTimeField(){
     return this._restfield || (this._restfield = DGet('span#current-work-leftTime'))
   }
@@ -202,8 +231,6 @@ class Clock { /* singleton clock */
     return this._totalfield || (this._totalfield = DGet('span#current-work-totalTime'))
   }
 
-  private alerte10minsDone: boolean = false;
-  private alerteWorkDone: boolean = false;
 
   private donneAlerte10mins(){
     ui.setBackgroundColorAt('orange');
@@ -212,6 +239,7 @@ class Clock { /* singleton clock */
     this.alerte10minsDone = true;
   }
   private donneAlerteWorkDone(){
+    ui.setBackgroundColorAt('rouge');
     this.bringAppToFront();
     Flash.notice('Work time is over. Please move on to the next work.');
     this.alerteWorkDone = true;

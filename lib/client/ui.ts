@@ -42,6 +42,9 @@ export class UI {
   }
 
 
+  /**
+   * Démarrage du travail
+   */
   private onStart(ev: Event){
     this.mask([this.btnStart]);
     clock.start(Work.currentWork);
@@ -81,7 +84,7 @@ export class UI {
 
 
   /**
-   * Pour affecter le thème
+   * Pour affecter le thème (dark ou light)
    */
   public setUITheme(theme: string) {
     document.body.className = theme;
