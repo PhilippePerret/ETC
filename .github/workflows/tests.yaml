@@ -7,6 +7,7 @@ on:
     branches: [ main ]
   # schedule:
   #   - cron: '0 12 * * *'  # Midi chaque jour
+  workflow_dispatch:
 
 jobs:
   test:
