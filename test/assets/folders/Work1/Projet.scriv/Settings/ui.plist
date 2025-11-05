@@ -40,10 +40,12 @@
 		<key>textScaleFactor</key>
 		<real>1</real>
 	</dict>
+	<key>mainDocumentEditor.scrollRect</key>
+	<string>{{0, 0}, {367, 280}}</string>
 	<key>mainDocumentEditor.textEditorState</key>
 	<dict>
 		<key>textScaleFactor</key>
-		<real>1</real>
+		<real>2</real>
 	</dict>
 	<key>mainWindowFrame</key>
 	<string>369 515 1000 678 0 0 3440 1415 </string>
@@ -52,6 +54,8 @@
 		<key>textScaleFactor</key>
 		<real>1</real>
 	</dict>
+	<key>supportingDocumentEditor.scrollRect</key>
+	<string>{{-1, 0}, {621, 290}}</string>
 	<key>supportingDocumentEditor.textEditorState</key>
 	<dict>
 		<key>textScaleFactor</key>
