@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # schedule:
+  #   - cron: '0 12 * * *'  # Midi chaque jour
 
 jobs:
   test:

@@ -1,5 +1,9 @@
 # ETC (Equal Task Cycle) 
 
+[![Tests](https://github.com/PhilippePerret/ETC/actions/workflows/tests.yaml/badge.svg)](https://github.com/PhilippePerret/ETC/actions/workflows/tests.yaml)
+
+[![Code Quality](https://github.com/PhilippePerret/ETC/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/PhilippePerret/ETC/actions/workflows/code-quality.yaml)
+
 **ETC** est une application qui permet de travailler un ensemble de tâches en leur alouant un temps afin de les exécuter toutes parallèlement sans en délaisser.
 
 Par exemple, si nous avons 5 tâches, et un temps par défaut de 2 heures, les tâches seront proposées dans le désordre, jusqu'à ce que chacune ait été accomplie pendant au moins 2 heures avant que le cycle ne recommence.
