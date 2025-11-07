@@ -1,3 +1,8 @@
+### 07/11/2025
+
+* Boutons fermer tous à gauche
+* Rapport temporels avec les inactifs
+
 ### 05/11/2025
 
 * Version 3 de l'icone
