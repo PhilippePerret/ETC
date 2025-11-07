@@ -72,6 +72,7 @@ class Tools { /* singleton */
 
   /**
    * Affichage du rapport de temps.
+   * -----------------------------
    */
   private async worksReportDisplay(ev: Event){
     stopEvent(ev);
@@ -81,21 +82,40 @@ class Tools { /* singleton */
       let tableau: string | string[] = []
       tableau.push([t('ui.thing.Work'), `${t('ui.thing.Cycle')}<sup>1</sup>`, `${t('ui.title.worked')}<sup>2</sup>`, `${t('ui.title.left')}<sup>3</sup>`, `${t('ui.title.total')}<sup>4</sup>`].join(' | '))
       tableau.push(['---', ':---:', ':---:', ':---:', ':---:'].join(' | '));
+      let tableau_inactifs: string | string[] = [];
+      tableau_inactifs.push([t('ui.thing.Work'), `${t('ui.thing.Cycle')}<sup>1</sup>`, `${t('ui.title.worked')}<sup>2</sup>`, `${t('ui.title.left')}<sup>3</sup>`, `${t('ui.title.total')}<sup>4</sup>`].join(' | '))
+      tableau_inactifs.push(['---', ':---:', ':---:', ':---:', ':---:'].join(' | '));
       retour.works.forEach((work: WorkType) => {
         const idw = work.id;
-        if (work.active === 0) { return }
+        const inactif = work.active === 0;
         const line = [
-          work.project, 
+          work.project,
           clock.mn2h(work.defaultLeftTime as number),
           clock.mn2h(work.defaultLeftTime as number - work.leftTime),
           clock.mn2h(work.leftTime),
           clock.mn2h(work.totalTime)
         ].join (' | ');
-        (tableau as string[]).push(line)
+        if ( inactif ) {
+          (tableau_inactifs as string[]).push(line)  
+        } else {
+          (tableau as string[]).push(line)
+        }
       });
+      console.log("Tableaux classés : ", tableau, tableau_inactifs);
+
+      // Tableau actifs
       (tableau as string[]).push(' | | | | ');
       tableau = tableau.map(line => `| ${line} |`).join("\n");
       tableau = markdown(tableau);
+
+      // Tableau inactifs
+      (tableau_inactifs as string[]).push(' | | | | ');
+      tableau_inactifs = tableau_inactifs.map(line => `| ${line} |`).join("\n");
+      tableau_inactifs = markdown(tableau_inactifs);
+      tableau_inactifs = tableau_inactifs.replace(/<table/, '<table class="inactifs"');
+      console.log("tableau_inactifs = ", tableau_inactifs);
+      tableau += tableau_inactifs;
+
       tableau += `
       <div style="margin-top:2em">
       <sup>1</sup> ${t('help.times.duree_cycle')}<br />

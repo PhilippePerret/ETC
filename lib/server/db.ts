@@ -52,6 +52,7 @@ class DBWorks { /* singleton db */
   }
 
   public getAllWorks(): WorkType[] {
+    console.log("-> getAllWorks")
     return this.run('SELECT * FROM works') as WorkType[];
   }
   

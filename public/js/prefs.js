@@ -17455,11 +17455,12 @@ class Tools {
       let tableau = [];
       tableau.push([t("ui.thing.Work"), `${t("ui.thing.Cycle")}<sup>1</sup>`, `${t("ui.title.worked")}<sup>2</sup>`, `${t("ui.title.left")}<sup>3</sup>`, `${t("ui.title.total")}<sup>4</sup>`].join(" | "));
       tableau.push(["---", ":---:", ":---:", ":---:", ":---:"].join(" | "));
+      let tableau_inactifs = [];
+      tableau_inactifs.push([t("ui.thing.Work"), `${t("ui.thing.Cycle")}<sup>1</sup>`, `${t("ui.title.worked")}<sup>2</sup>`, `${t("ui.title.left")}<sup>3</sup>`, `${t("ui.title.total")}<sup>4</sup>`].join(" | "));
+      tableau_inactifs.push(["---", ":---:", ":---:", ":---:", ":---:"].join(" | "));
       retour.works.forEach((work) => {
         const idw = work.id;
-        if (work.active === 0) {
-          return;
-        }
+        const inactif = work.active === 0;
         const line = [
           work.project,
           clock.mn2h(work.defaultLeftTime),
@@ -17467,12 +17468,24 @@ class Tools {
           clock.mn2h(work.leftTime),
           clock.mn2h(work.totalTime)
         ].join(" | ");
-        tableau.push(line);
+        if (inactif) {
+          tableau_inactifs.push(line);
+        } else {
+          tableau.push(line);
+        }
       });
+      console.log("Tableaux classés : ", tableau, tableau_inactifs);
       tableau.push(" | | | | ");
       tableau = tableau.map((line) => `| ${line} |`).join(`
 `);
       tableau = markdown(tableau);
+      tableau_inactifs.push(" | | | | ");
+      tableau_inactifs = tableau_inactifs.map((line) => `| ${line} |`).join(`
+`);
+      tableau_inactifs = markdown(tableau_inactifs);
+      tableau_inactifs = tableau_inactifs.replace(/<table/, '<table class="inactifs"');
+      console.log("tableau_inactifs = ", tableau_inactifs);
+      tableau += tableau_inactifs;
       tableau += `
       <div style="margin-top:2em">
       <sup>1</sup> ${t("help.times.duree_cycle")}<br />

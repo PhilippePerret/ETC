@@ -124,8 +124,9 @@ export function setupRoutes(app: Express) {
   });
 
   app.post('/works/get-all-data', (req, res) => {
+    log.info("->route /works/get-all-data");
     const data: RecType = req.body;
-    const works = db.getAllActiveWorks();
+    const works = db.getAllWorks();
     res.json(Object.assign(data, {
       ok: true,
       works: works,

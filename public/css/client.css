@@ -364,3 +364,9 @@ div#tools-container div.tool-container > div.explication {
   font-size: 0.75em;
   margin-left: 40px;
 }
+
+/* Le tableau des inactifs dans le rapport des temps */
+table.inactifs {
+  margin-top: 1em;
+  opacity: 0.7;
+}
