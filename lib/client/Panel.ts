@@ -53,6 +53,7 @@ export class Panel {
     o.appendChild(f);
     this.btnOk = document.createElement('BUTTON') as HTMLButtonElement;
     this.btnOk.innerHTML = t('ui.button.ok');
+    this.btnOk.className = 'fleft';
     f.appendChild(this.btnOk);
     document.body.appendChild(o);
     this.obj = o as HTMLDivElement;
