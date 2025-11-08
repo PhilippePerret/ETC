@@ -10,16 +10,20 @@ table {
   border-spacing: 0;
 }
 
-table thead {
+table thead,
+table tr.header {
   background-color: #26515c;
 }
-body.light table thead {
+body.light table thead,
+body.light table tr.header {
   color: white;
 }
-table thead th:nth-child(1) {
+table thead th:nth-child(1),
+table tr.header td:nth-child(1) {
   border-top-left-radius: 0.5em;
 }
-table thead th:last-child {
+table thead th:last-child,
+table tr.header td:last-child {
   border-top-right-radius: 0.5em;
 }
 

@@ -1,12 +1,12 @@
 import { t } from "../shared/Locale";
-import { DGet, stopEvent } from "../../public/js/dom.js";
+import { DGet, stopEvent, span, table, tr, td } from "../../public/js/dom.js";
 import { Flash } from "../../public/js/flash.js";
 import { ui } from "./ui";
 import { markdown } from "../shared/utils_shared";
 import { postToServer } from "./utils";
 import { Work } from "./work.js";
 import prefs from "./prefs.js";
-import type { WorkType } from "../shared/types";
+import type { RecType, WorkType } from "../shared/types";
 import { Panel } from "./Panel.js";
 import { clock } from "./Clock.js";
 
@@ -71,73 +71,20 @@ class Tools { /* singleton */
   // --- //
 
   /**
-   * Affichage du rapport de temps.
+   * Affichage du rapport de temps
    * -----------------------------
+   * On passe par ici dès qu'on doit fabriquer les tableaux, 
+   * c'est-à-dire dès qu'on demande un classement différent.
+   * Mais c'est seulement la première fois qu'on construit les
+   * rangées de chaque travail. Ensuite, on ne fera que les 
+   * classer.
    */
   private async worksReportDisplay(ev: Event){
     stopEvent(ev);
-    const retour = await postToServer('/works/get-all-data', {process: 'times_report tool'});
-    if (retour.ok) {
-      console.log("RETOUR: ", retour);
-      let tableau: string | string[] = []
-      tableau.push([t('ui.thing.Work'), `${t('ui.thing.Cycle')}<sup>1</sup>`, `${t('ui.title.worked')}<sup>2</sup>`, `${t('ui.title.left')}<sup>3</sup>`, `${t('ui.title.total')}<sup>4</sup>`].join(' | '))
-      tableau.push(['---', ':---:', ':---:', ':---:', ':---:'].join(' | '));
-      let tableau_inactifs: string | string[] = [];
-      tableau_inactifs.push([t('ui.thing.Work'), `${t('ui.thing.Cycle')}<sup>1</sup>`, `${t('ui.title.worked')}<sup>2</sup>`, `${t('ui.title.left')}<sup>3</sup>`, `${t('ui.title.total')}<sup>4</sup>`].join(' | '))
-      tableau_inactifs.push(['---', ':---:', ':---:', ':---:', ':---:'].join(' | '));
-      retour.works.forEach((work: WorkType) => {
-        const idw = work.id;
-        const inactif = work.active === 0;
-        const line = [
-          work.project,
-          clock.mn2h(work.defaultLeftTime as number),
-          clock.mn2h(work.defaultLeftTime as number - work.leftTime),
-          clock.mn2h(work.leftTime),
-          clock.mn2h(work.totalTime)
-        ].join (' | ');
-        if ( inactif ) {
-          (tableau_inactifs as string[]).push(line)  
-        } else {
-          (tableau as string[]).push(line)
-        }
-      });
-      console.log("Tableaux classés : ", tableau, tableau_inactifs);
-
-      // Tableau actifs
-      (tableau as string[]).push(' | | | | ');
-      tableau = tableau.map(line => `| ${line} |`).join("\n");
-      tableau = markdown(tableau);
-
-      // Tableau inactifs
-      (tableau_inactifs as string[]).push(' | | | | ');
-      tableau_inactifs = tableau_inactifs.map(line => `| ${line} |`).join("\n");
-      tableau_inactifs = markdown(tableau_inactifs);
-      tableau_inactifs = tableau_inactifs.replace(/<table/, '<table class="inactifs"');
-      console.log("tableau_inactifs = ", tableau_inactifs);
-      tableau += tableau_inactifs;
-
-      tableau += `
-      <div style="margin-top:2em">
-      <sup>1</sup> ${t('help.times.duree_cycle')}<br />
-      <sup>2</sup> ${t('help.times.duree_worked')}<br />
-      <sup>3</sup> ${t('help.times.duree_left')}<br />
-      <sup>4</sup> ${t('help.times.duree_totale')}<br />
-      </div>
-      `.replace(/^\s+/gm, '');
-      // console.log("tableau", tableau);
-      if (undefined === this.TimesReportPanel) {
-        this.TimesReportPanel = new Panel({
-          title: t('ui.title.times_report'),
-          buttons: 'ok',
-          content: tableau
-        })
-      } else {
-        this.TimesReportPanel.setContent(tableau);
-      }
-      this.TimesReportPanel.show();
-    };  
+    await this.buildWorkRows();
   }
   private TimesReportPanel!: Panel;
+
   // -------- /TOOLS ----------
 
 
@@ -165,6 +112,133 @@ class Tools { /* singleton */
     this.built = true;
   }
   
+
+
+
+  private TRDataWorks!: RecType;
+
+  private async buildWorkRows(): Promise<void>{
+    const retour = await postToServer('/works/get-all-data', {process: 'times_report tool'});
+    if (false === retour.ok) return;
+    // console.log("RETOUR: ", retour);
+    let header = tr([
+      td(span(t('ui.thing.Work'),'work'), 'header'), 
+      td(span(`${t('ui.thing.Cycle')}<sup>1</sup>`, 'cycle'), 'header'), 
+      td(span(`${t('ui.title.worked')}<sup>2</sup>`, 'worked'), 'header'), 
+      td(span(`${t('ui.title.left')}<sup>3</sup>`, 'left'), 'header'), 
+      td(span(`${t('ui.title.total')}<sup>4</sup>`, 'total'), 'header')
+    ].join(''), 'header');
+
+    this.TRDataWorks = {};
+
+    let tableau_actifs: string | string[] = [];
+    tableau_actifs.push(header);
+    let tableau_inactifs: string | string[] = [];
+    tableau_inactifs.push(header);
+
+    retour.works.forEach((work: WorkType) => {
+      const idw = work.id;
+      const inactif = work.active === 0;
+      Object.assign(this.TRDataWorks, {[idw]: {
+        id: idw,
+        actif: !inactif,
+        inactif: inactif,
+        work: work.project,
+        cycle: work.defaultLeftTime,
+        worked: (work.defaultLeftTime as number) - work.leftTime,
+        left: work.leftTime,
+        total: work.totalTime
+      }});
+      const line = tr([
+        td(work.project),
+        td(clock.mn2h(work.defaultLeftTime as number)),
+        td(clock.mn2h(work.defaultLeftTime as number - work.leftTime)),
+        td(clock.mn2h(work.leftTime)),
+        td(clock.mn2h(work.totalTime))
+      ].join(''), 'work', `rowwork-${idw}`);
+      if ( inactif ) {
+        (tableau_inactifs as string[]).push(line)  
+      } else {
+        (tableau_actifs as string[]).push(line)
+      }
+    });
+
+    // Finaliser les tableaux
+    tableau_actifs = table(tableau_actifs.join(''), 'tempo-report actifs');
+    tableau_inactifs = table(tableau_inactifs.join(''), 'tempo-report inactifs');
+    
+    let tableaux = tableau_actifs + tableau_inactifs + `
+    <div style="margin-top:2em">
+    <sup>1</sup> ${t('help.times.duree_cycle')}<br />
+    <sup>2</sup> ${t('help.times.duree_worked')}<br />
+    <sup>3</sup> ${t('help.times.duree_left')}<br />
+    <sup>4</sup> ${t('help.times.duree_totale')}<br />
+    </div>
+    `.replace(/^\s+/gm, '');
+
+    // console.log("TABLEAUX", tableaux);
+
+    if (undefined === this.TimesReportPanel) {
+      this.TimesReportPanel = new Panel({
+        title: t('ui.title.times_report'),
+        buttons: 'ok',
+        content: tableaux
+      });
+      this.TimesReportPanel.show();
+      this.observeTimesReportPanel()
+    } else {
+      this.TimesReportPanel.setContent(tableaux);
+      this.TimesReportPanel.show();
+    }
+  }
+
+  /**
+   * Pour observer le panneau du rapport des temps
+   * Cette observation consiste principalement à surveiller les 
+   * colonne pour faire les classements
+   */
+  private observeTimesReportPanel(){
+    const tbActifs = DGet('table.actifs');
+    const tbInactifs = DGet('table.inactifs');
+    ['work', 'cycle', 'worked', 'left', 'total'].forEach((prop: string) => {
+      DGet(`td.header span.${prop}`, tbActifs).addEventListener('click', this.sortTimesReportBy.bind(this, prop));
+    });
+  }
+
+  /**
+   * Fonction appelée quand on clique sur une propriété de l'entête 
+   * pour classer selon une certain propriété
+   */
+  private sortTimesReportBy(keySort: string, ev: MouseEvent){
+    const span = ev.target as HTMLSpanElement;
+    const dir = (span.dataset.dir || 'asc') === 'desc' ? 'asc' : 'desc';
+    stopEvent(ev);
+    // Classement
+    let sorted = Object.values(this.TRDataWorks).sort((wa: RecType, wb: RecType) => {
+      if (wa[keySort] > wb[keySort]) { return -1 }
+      else { return 1 }
+    });
+    console.log("sorted", sorted);
+    // Faut-il inverser la liste ?
+    if ( dir === 'asc') { sorted = sorted.reverse() }
+
+    // On classe dans le tableau
+    let lastWorkActif, lastWorkInactif;
+    for(var i = sorted.length - 1; i > -1; --i){ // en remontant
+      const work = sorted[i];
+      let prevWork = work.actif ? lastWorkActif : lastWorkInactif;
+      if ( prevWork ) {
+        let rowWork = DGet(`table.tempo-report.${work.actif?'actifs':'inactifs'} tr#rowwork-${work.id}`);
+        let rowPrevWork = DGet(`table.tempo-report.${work.actif?'actifs':'inactifs'} tr#rowwork-${prevWork.id}`);
+        rowWork.parentNode.insertBefore(rowWork, rowPrevWork);
+      }
+      if (work.actif) { lastWorkActif = work } else { lastWorkInactif = work }
+    }
+
+    // On mémorise le classement 
+    (span as HTMLSpanElement).dataset.dir = dir;
+  }
+
   private get container(){return DGet('#tools-container')}
   private built: boolean = false;
 

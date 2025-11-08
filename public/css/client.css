@@ -365,8 +365,20 @@ div#tools-container div.tool-container > div.explication {
   margin-left: 40px;
 }
 
+/* 
+
+  ==== Tableaux de rapport de tempo ====
+
+*/
+table.tempo-report tr td:first-child {
+  width: 300px;
+}
+
 /* Le tableau des inactifs dans le rapport des temps */
 table.inactifs {
   margin-top: 1em;
   opacity: 0.7;
+}
+table.tempo-report.actifs tr.header td span {
+  cursor: nwse-resize;
 }

@@ -12,6 +12,27 @@ export function DGet(selector, container) {
   }
 }
 
+export function table(contenu, css, id){
+  return wrapIn('table', contenu, css, id)
+}
+export function span(contenu, css, id) {
+  return wrapIn('span', contenu, css, id);
+}
+export function td(contenu, css, id){
+  return wrapIn('td', contenu, css, id);
+}
+export function tr(contenu, css, id){
+  return wrapIn('tr', contenu, css, id);
+}
+
+export function wrapIn(tag, contenu, css, id){
+  let attrs = [];
+  id && attrs.push(`id="${id}"`);
+  css && attrs.push(`class="${css}"`);
+  if (attrs.length) { attrs = ' ' + attrs.join(' ')}
+  return `<${tag}${attrs}>${contenu}</${tag}>`;
+}
+
 export function stopEvent(ev){
   ev.stopPropagation();
   ev.preventDefault();

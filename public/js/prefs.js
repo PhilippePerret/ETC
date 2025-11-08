@@ -41,6 +41,27 @@ function DGet(selector, container) {
     }
   }
 }
+function table(contenu, css, id) {
+  return wrapIn("table", contenu, css, id);
+}
+function span(contenu, css, id) {
+  return wrapIn("span", contenu, css, id);
+}
+function td(contenu, css, id) {
+  return wrapIn("td", contenu, css, id);
+}
+function tr(contenu, css, id) {
+  return wrapIn("tr", contenu, css, id);
+}
+function wrapIn(tag, contenu, css, id) {
+  let attrs = [];
+  id && attrs.push(`id="${id}"`);
+  css && attrs.push(`class="${css}"`);
+  if (attrs.length) {
+    attrs = " " + attrs.join(" ");
+  }
+  return `<${tag}${attrs}>${contenu}</${tag}>`;
+}
 function stopEvent(ev) {
   ev.stopPropagation();
   ev.preventDefault();
@@ -10961,7 +10982,7 @@ function peekDelete() {
 function defaultStringLength(value) {
   return value.length;
 }
-function markdownTable(table, options) {
+function markdownTable(table2, options) {
   const settings = options || {};
   const align = (settings.align || []).concat();
   const stringLength = settings.stringLength || defaultStringLength;
@@ -10971,15 +10992,15 @@ function markdownTable(table, options) {
   const longestCellByColumn = [];
   let mostCellsPerRow = 0;
   let rowIndex = -1;
-  while (++rowIndex < table.length) {
+  while (++rowIndex < table2.length) {
     const row2 = [];
     const sizes2 = [];
     let columnIndex2 = -1;
-    if (table[rowIndex].length > mostCellsPerRow) {
-      mostCellsPerRow = table[rowIndex].length;
+    if (table2[rowIndex].length > mostCellsPerRow) {
+      mostCellsPerRow = table2[rowIndex].length;
     }
-    while (++columnIndex2 < table[rowIndex].length) {
-      const cell = serialize(table[rowIndex][columnIndex2]);
+    while (++columnIndex2 < table2[rowIndex].length) {
+      const cell = serialize(table2[rowIndex][columnIndex2]);
       if (settings.alignDelimiters !== false) {
         const size = stringLength(cell);
         sizes2[columnIndex2] = size;
@@ -13265,15 +13286,15 @@ function flushCell(map4, context, range, rowKind, rowEnd, previousCell) {
   }
   return previousCell;
 }
-function flushTableEnd(map4, context, index2, table, tableBody) {
+function flushTableEnd(map4, context, index2, table2, tableBody) {
   const exits = [];
   const related = getPoint(context.events, index2);
   if (tableBody) {
     tableBody.end = Object.assign({}, related);
     exits.push(["exit", tableBody, context]);
   }
-  table.end = Object.assign({}, related);
-  exits.push(["exit", table, context]);
+  table2.end = Object.assign({}, related);
+  exits.push(["exit", table2, context]);
   map4.add(index2 + 1, 0, exits);
 }
 function getPoint(events, index2) {
@@ -13764,7 +13785,7 @@ function position2(node2) {
   }
 }
 // node_modules/mdast-util-to-hast/lib/handlers/table.js
-function table(state, node2) {
+function table2(state, node2) {
   const rows = state.all(node2);
   const firstRow = rows.shift();
   const tableContent = [];
@@ -13926,7 +13947,7 @@ var handlers = {
   paragraph: paragraph2,
   root: root2,
   strong: strong2,
-  table,
+  table: table2,
   tableCell,
   tableRow,
   text: text5,
@@ -16139,7 +16160,7 @@ var closing = omission({
   tfoot,
   th: cells,
   thead,
-  tr
+  tr: tr2
 });
 function headOrColgroupOrCaption(_, index2, parent) {
   const next = siblingAfter(parent, index2, true);
@@ -16192,7 +16213,7 @@ function tbody(_, index2, parent) {
 function tfoot(_, index2, parent) {
   return !siblingAfter(parent, index2);
 }
-function tr(_, index2, parent) {
+function tr2(_, index2, parent) {
   const next = siblingAfter(parent, index2);
   return !next || next.type === "element" && next.tagName === "tr";
 }
@@ -17390,6 +17411,7 @@ class Panel {
     o.appendChild(f);
     this.btnOk = document.createElement("BUTTON");
     this.btnOk.innerHTML = t("ui.button.ok");
+    this.btnOk.className = "fleft";
     f.appendChild(this.btnOk);
     document.body.appendChild(o);
     this.obj = o;
@@ -17449,62 +17471,7 @@ class Tools {
   }
   async worksReportDisplay(ev) {
     stopEvent(ev);
-    const retour = await postToServer("/works/get-all-data", { process: "times_report tool" });
-    if (retour.ok) {
-      console.log("RETOUR: ", retour);
-      let tableau = [];
-      tableau.push([t("ui.thing.Work"), `${t("ui.thing.Cycle")}<sup>1</sup>`, `${t("ui.title.worked")}<sup>2</sup>`, `${t("ui.title.left")}<sup>3</sup>`, `${t("ui.title.total")}<sup>4</sup>`].join(" | "));
-      tableau.push(["---", ":---:", ":---:", ":---:", ":---:"].join(" | "));
-      let tableau_inactifs = [];
-      tableau_inactifs.push([t("ui.thing.Work"), `${t("ui.thing.Cycle")}<sup>1</sup>`, `${t("ui.title.worked")}<sup>2</sup>`, `${t("ui.title.left")}<sup>3</sup>`, `${t("ui.title.total")}<sup>4</sup>`].join(" | "));
-      tableau_inactifs.push(["---", ":---:", ":---:", ":---:", ":---:"].join(" | "));
-      retour.works.forEach((work) => {
-        const idw = work.id;
-        const inactif = work.active === 0;
-        const line = [
-          work.project,
-          clock.mn2h(work.defaultLeftTime),
-          clock.mn2h(work.defaultLeftTime - work.leftTime),
-          clock.mn2h(work.leftTime),
-          clock.mn2h(work.totalTime)
-        ].join(" | ");
-        if (inactif) {
-          tableau_inactifs.push(line);
-        } else {
-          tableau.push(line);
-        }
-      });
-      console.log("Tableaux classés : ", tableau, tableau_inactifs);
-      tableau.push(" | | | | ");
-      tableau = tableau.map((line) => `| ${line} |`).join(`
-`);
-      tableau = markdown(tableau);
-      tableau_inactifs.push(" | | | | ");
-      tableau_inactifs = tableau_inactifs.map((line) => `| ${line} |`).join(`
-`);
-      tableau_inactifs = markdown(tableau_inactifs);
-      tableau_inactifs = tableau_inactifs.replace(/<table/, '<table class="inactifs"');
-      console.log("tableau_inactifs = ", tableau_inactifs);
-      tableau += tableau_inactifs;
-      tableau += `
-      <div style="margin-top:2em">
-      <sup>1</sup> ${t("help.times.duree_cycle")}<br />
-      <sup>2</sup> ${t("help.times.duree_worked")}<br />
-      <sup>3</sup> ${t("help.times.duree_left")}<br />
-      <sup>4</sup> ${t("help.times.duree_totale")}<br />
-      </div>
-      `.replace(/^\s+/gm, "");
-      if (this.TimesReportPanel === undefined) {
-        this.TimesReportPanel = new Panel({
-          title: t("ui.title.times_report"),
-          buttons: "ok",
-          content: tableau
-        });
-      } else {
-        this.TimesReportPanel.setContent(tableau);
-      }
-      this.TimesReportPanel.show();
-    }
+    await this.buildWorkRows();
   }
   TimesReportPanel;
   build() {
@@ -17526,6 +17493,111 @@ class Tools {
       a.addEventListener("click", dtool.method);
     });
     this.built = true;
+  }
+  TRDataWorks;
+  async buildWorkRows() {
+    const retour = await postToServer("/works/get-all-data", { process: "times_report tool" });
+    if (retour.ok === false)
+      return;
+    let header = tr([
+      td(span(t("ui.thing.Work"), "work"), "header"),
+      td(span(`${t("ui.thing.Cycle")}<sup>1</sup>`, "cycle"), "header"),
+      td(span(`${t("ui.title.worked")}<sup>2</sup>`, "worked"), "header"),
+      td(span(`${t("ui.title.left")}<sup>3</sup>`, "left"), "header"),
+      td(span(`${t("ui.title.total")}<sup>4</sup>`, "total"), "header")
+    ].join(""), "header");
+    this.TRDataWorks = {};
+    let tableau_actifs = [];
+    tableau_actifs.push(header);
+    let tableau_inactifs = [];
+    tableau_inactifs.push(header);
+    retour.works.forEach((work) => {
+      const idw = work.id;
+      const inactif = work.active === 0;
+      Object.assign(this.TRDataWorks, { [idw]: {
+        id: idw,
+        actif: !inactif,
+        inactif,
+        work: work.project,
+        cycle: work.defaultLeftTime,
+        worked: work.defaultLeftTime - work.leftTime,
+        left: work.leftTime,
+        total: work.totalTime
+      } });
+      const line = tr([
+        td(work.project),
+        td(clock.mn2h(work.defaultLeftTime)),
+        td(clock.mn2h(work.defaultLeftTime - work.leftTime)),
+        td(clock.mn2h(work.leftTime)),
+        td(clock.mn2h(work.totalTime))
+      ].join(""), "work", `rowwork-${idw}`);
+      if (inactif) {
+        tableau_inactifs.push(line);
+      } else {
+        tableau_actifs.push(line);
+      }
+    });
+    tableau_actifs = table(tableau_actifs.join(""), "tempo-report actifs");
+    tableau_inactifs = table(tableau_inactifs.join(""), "tempo-report inactifs");
+    let tableaux = tableau_actifs + tableau_inactifs + `
+    <div style="margin-top:2em">
+    <sup>1</sup> ${t("help.times.duree_cycle")}<br />
+    <sup>2</sup> ${t("help.times.duree_worked")}<br />
+    <sup>3</sup> ${t("help.times.duree_left")}<br />
+    <sup>4</sup> ${t("help.times.duree_totale")}<br />
+    </div>
+    `.replace(/^\s+/gm, "");
+    if (this.TimesReportPanel === undefined) {
+      this.TimesReportPanel = new Panel({
+        title: t("ui.title.times_report"),
+        buttons: "ok",
+        content: tableaux
+      });
+      this.TimesReportPanel.show();
+      this.observeTimesReportPanel();
+    } else {
+      this.TimesReportPanel.setContent(tableaux);
+      this.TimesReportPanel.show();
+    }
+  }
+  observeTimesReportPanel() {
+    const tbActifs = DGet("table.actifs");
+    const tbInactifs = DGet("table.inactifs");
+    ["work", "cycle", "worked", "left", "total"].forEach((prop) => {
+      DGet(`td.header span.${prop}`, tbActifs).addEventListener("click", this.sortTimesReportBy.bind(this, prop));
+    });
+  }
+  sortTimesReportBy(keySort, ev) {
+    const span2 = ev.target;
+    const dir = (span2.dataset.dir || "asc") === "desc" ? "asc" : "desc";
+    stopEvent(ev);
+    let sorted = Object.values(this.TRDataWorks).sort((wa, wb) => {
+      if (wa[keySort] > wb[keySort]) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+    console.log("sorted", sorted);
+    if (dir === "asc") {
+      sorted = sorted.reverse();
+    }
+    let lastWorkActif, lastWorkInactif;
+    for (var i2 = sorted.length - 1;i2 > -1; --i2) {
+      const work = sorted[i2];
+      let prevWork = work.actif ? lastWorkActif : lastWorkInactif;
+      if (prevWork) {
+        let rowWork = DGet(`table.tempo-report.${work.actif ? "actifs" : "inactifs"} tr#rowwork-${work.id}`);
+        let rowPrevWork = DGet(`table.tempo-report.${work.actif ? "actifs" : "inactifs"} tr#rowwork-${prevWork.id}`);
+        rowWork.parentNode.insertBefore(rowWork, rowPrevWork);
+      }
+      if (work.actif) {
+        lastWorkActif = work;
+      } else {
+        lastWorkInactif = work;
+      }
+    }
+    span2.dataset.dir = dir;
   }
   get container() {
     return DGet("#tools-container");
