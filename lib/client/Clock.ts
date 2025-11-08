@@ -190,7 +190,12 @@ class Clock { /* singleton clock */
      * AFFICHAGE DU TEMPS DANS L'INTERFACE  *
      ****************************************/
     // L'horloge principale
-    this.clockObj.innerHTML = this.s2h(displayedSeconds);
+    const curhorl = this.s2h(displayedSeconds);
+    if (ui.currentSection === 'work'){
+      this.clockObj.innerHTML = curhorl;
+    } else {
+      ui.setTitle(`ETC — ${curhorl}`);
+    }
     // Les temps du travail (seulement si la "minute" a changé)
     if (secondesOfWork % 60 === 0) {
       const thisMinute = Math.round(secondesOfWork / 60);

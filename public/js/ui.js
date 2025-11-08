@@ -4487,7 +4487,12 @@ class Clock {
       displayedSeconds = this.totalRestTimeSeconds - secondesOfWork;
     }
     const leftTime = this.workRestTime(secondesOfWork);
-    this.clockObj.innerHTML = this.s2h(displayedSeconds);
+    const curhorl = this.s2h(displayedSeconds);
+    if (ui.currentSection === "work") {
+      this.clockObj.innerHTML = curhorl;
+    } else {
+      ui.setTitle(`ETC — ${curhorl}`);
+    }
     if (secondesOfWork % 60 === 0) {
       const thisMinute = Math.round(secondesOfWork / 60);
       const elapsedMinutes = this.currentWork.cycleTime + thisMinute;
@@ -17078,11 +17083,6 @@ function stopEvent2(ev) {
 }
 
 class UI {
-  static inst;
-  constructor() {}
-  static getInst() {
-    return UI.inst || (UI.inst = new UI);
-  }
   init(data) {
     clock.setClockStyle(data.clock);
     clock.setCounterMode(data.counter);
@@ -17134,15 +17134,28 @@ class UI {
     document.body.style.backgroundColor = "";
   }
   SECTIONS = ["work", "help", "prefs", "editing"];
+  currentSection = "work";
   toggleSection(name) {
+    console.log("toggleSection: ", name);
     this.SECTIONS.forEach((section) => {
       if (name === section) {
         this.openSection(section);
+        this.currentSection = name;
+        if (name === "work") {
+          this.setTitle("ETC");
+        }
       } else {
         this.closeSection(section);
       }
     });
   }
+  setTitle(title) {
+    this.titleObj.innerHTML = title;
+  }
+  get titleObj() {
+    return this._titobj || (this._titobj = document.querySelector("head title"));
+  }
+  _titobj;
   toggleHelp() {
     if (this.isSectionOpen("help")) {
       this.toggleSection("work");
@@ -17289,6 +17302,11 @@ class UI {
       ]
     ];
   }
+  static inst;
+  constructor() {}
+  static singleton() {
+    return UI.inst || (UI.inst = new UI);
+  }
 }
 
 class Button {
@@ -17336,7 +17354,7 @@ class Button {
     return this._obj;
   }
 }
-var ui = UI.getInst();
+var ui = UI.singleton();
 export {
   ui,
   UI

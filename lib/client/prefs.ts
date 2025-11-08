@@ -105,13 +105,13 @@ export class Prefs { /* singleton */
   }
 
   private close(){ 
-    ui.openSection('work');
-    ui.closeSection('prefs');
+    ui.toggleSection(this.lastSection);
   }
-  private open(){ 
-    ui.openSection('prefs');
-    ui.closeSection('work');
+  private open(){
+    this.lastSection = String(ui.currentSection);
+    ui.toggleSection('prefs');
   }
+  private lastSection!: string;
 
   private observeButtons(){
     listenBtn('prefs', this.onOpen.bind(this));

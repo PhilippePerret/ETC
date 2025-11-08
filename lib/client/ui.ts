@@ -23,10 +23,7 @@ interface ButtonType {
 
 
 
-export class UI {
-  private static inst: UI;
-  private constructor(){}
-  public static getInst(){return UI.inst || (UI.inst = new UI())}
+export class UI { /* singleton ui */
 
   public init(data: RecType){
     clock.setClockStyle(data.clock);
@@ -101,18 +98,31 @@ export class UI {
   }
 
   SECTIONS = ['work', 'help', 'prefs', 'editing']
+
+  public currentSection: string = 'work';
   /**
    * To display one section
    */
   public toggleSection(name: string){
+    console.log("toggleSection: ", name);
     this.SECTIONS.forEach(section => {
       if ( name === section ) {
         this.openSection(section);
+        this.currentSection = name;
+        if (name === 'work') { this.setTitle('ETC')}
       } else {
         this.closeSection(section);
       }
     });
   }
+
+  public setTitle(title: string){
+    this.titleObj.innerHTML = title;
+  }
+  private get titleObj(){
+    return this._titobj || (this._titobj = (document.querySelector('head title') as HTMLElement))
+  }
+  private _titobj!: HTMLElement;
 
   /**
    * Pour basculer sur l'aide
@@ -252,6 +262,11 @@ export class UI {
         t('ui.text.to_restart_work_on_work')]
       ];
   }
+
+  private static inst: UI;
+  private constructor(){}
+  public static singleton(){return UI.inst || (UI.inst = new UI())}
+
 }
 
 class Button {
@@ -297,9 +312,10 @@ class Button {
 
   public get id(){ return this.data.id; }
   private get obj(){return this._obj;}
+
 }
 
 
 
 
-export const ui = UI.getInst();
+export const ui = UI.singleton();
