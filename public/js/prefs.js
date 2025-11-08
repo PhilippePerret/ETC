@@ -17370,8 +17370,6 @@ init_flash();
 init_utils();
 
 // lib/client/Panel.ts
-init_Locale();
-
 class Panel {
   data;
   obj;
@@ -17410,7 +17408,7 @@ class Panel {
     const f = document.createElement("FOOTER");
     o.appendChild(f);
     this.btnOk = document.createElement("BUTTON");
-    this.btnOk.innerHTML = t("ui.button.ok");
+    this.btnOk.innerHTML = this.data.buttons;
     this.btnOk.className = "fleft";
     f.appendChild(this.btnOk);
     document.body.appendChild(o);
@@ -17550,7 +17548,7 @@ class Tools {
     if (this.TimesReportPanel === undefined) {
       this.TimesReportPanel = new Panel({
         title: t("ui.title.times_report"),
-        buttons: "ok",
+        buttons: t("ui.button.close"),
         content: tableaux
       });
       this.TimesReportPanel.show();

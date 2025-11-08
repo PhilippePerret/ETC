@@ -20,4 +20,6 @@ div.panel div.panel-title {
 }
 div.panel div.panel-content {
   padding: 1em;
+  max-height: 80vh;
+  overflow-y: auto;
 }

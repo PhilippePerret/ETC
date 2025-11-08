@@ -181,7 +181,7 @@ class Tools { /* singleton */
     if (undefined === this.TimesReportPanel) {
       this.TimesReportPanel = new Panel({
         title: t('ui.title.times_report'),
-        buttons: 'ok',
+        buttons: t('ui.button.close'),
         content: tableaux
       });
       this.TimesReportPanel.show();

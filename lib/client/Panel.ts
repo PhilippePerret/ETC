@@ -14,7 +14,7 @@ export class Panel {
   constructor(
     private data: {
       title: string,
-      buttons: 'ok' | ButtonType[]
+      buttons: 'ok' | string | ButtonType[]
       content: string;
     }
   ){}
@@ -52,7 +52,7 @@ export class Panel {
     const f = document.createElement('FOOTER');
     o.appendChild(f);
     this.btnOk = document.createElement('BUTTON') as HTMLButtonElement;
-    this.btnOk.innerHTML = t('ui.button.ok');
+    this.btnOk.innerHTML = this.data.buttons as string;
     this.btnOk.className = 'fleft';
     f.appendChild(this.btnOk);
     document.body.appendChild(o);
