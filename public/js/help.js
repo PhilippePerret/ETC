@@ -4490,7 +4490,7 @@ class Clock {
       displayedSeconds = this.totalRestTimeSeconds - secondesOfWork;
     }
     const leftTime = this.workRestTime(secondesOfWork);
-    const curhorl = this.s2h(displayedSeconds);
+    const curhorl = this.s2h(displayedSeconds || 0);
     if (ui.currentSection === "work") {
       this.clockObj.innerHTML = curhorl;
     } else {

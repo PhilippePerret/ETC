@@ -190,7 +190,7 @@ class Clock { /* singleton clock */
      * AFFICHAGE DU TEMPS DANS L'INTERFACE  *
      ****************************************/
     // L'horloge principale
-    const curhorl = this.s2h(displayedSeconds);
+    const curhorl = this.s2h(displayedSeconds || 0); // '|| 0' fix \#190
     if (ui.currentSection === 'work'){
       this.clockObj.innerHTML = curhorl;
     } else {
