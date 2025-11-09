@@ -12,7 +12,8 @@ import { activTracker } from './activityTracker';
 import { manual } from './Manual';
 
 
-const APP_PATH = path.resolve('.');
+// const APP_PATH = path.resolve('.');
+const APP_PATH = process.env.APP_PATH || path.join(__dirname, '../..');
 console.log("APP_PATH = %s", APP_PATH);
 const MAIN_HTML_FILE = path.join(APP_PATH, 'public', 'main.html');
 console.log("MAIN_HTML_FILE = %s", MAIN_HTML_FILE);

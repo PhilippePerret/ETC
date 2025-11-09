@@ -4,10 +4,14 @@
  * Pour ce faire, il cherche le premier fichier/dossier modifié
  * depuis la précédente date de check.
  */
-import fs from 'fs';
 import path from 'path';
 
-const fileWatcher = new Worker(path.join(__dirname, 'ActivityTracker_watcher.ts'));
+// const fileWatcher = new Worker(path.join(__dirname, 'ActivityTracker_watcher.ts'));
+const fileWatcher = new Worker(
+  process.env.APP_PATH 
+    ? path.join(process.env.APP_PATH, 'lib', 'server', 'ActivityTracker_watcher.ts')
+    : path.join(__dirname, 'ActivityTracker_watcher.ts')
+);
 
 export class ActivityTracker /* SERVER */ { /* singleton */
   public static singleton(){return this._inst || (this._inst = new ActivityTracker())}

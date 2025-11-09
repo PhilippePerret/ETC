@@ -3,7 +3,7 @@
   "productName": "ETC",
   "description": "Application de gestion cyclique de travaux",
   "author": "Philicare<philippe.perret@yahoo.fr>",
-  "version": "0.6.6",
+  "version": "0.6.21",
   "private": true,
   "main": "electron/main.js",
   "devDependencies": {
@@ -63,7 +63,8 @@
     "asarUnpack": [
       "public/**/*",
       "lib/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "node_modules/**/*"
     ],
     "files": [
       "electron/**/*",

@@ -4,9 +4,22 @@ import yaml from 'js-yaml';
 import { readFileSync } from "fs";
 
 
-const LOCALES_FOLDER = path.resolve(path.join(__dirname,'..','locales'));
+// console.log('APP_PATH =', process.env.APP_PATH);
+console.log('__dirname =', __dirname);
+
+// FOIRE: const LOCALES_FOLDER = path.resolve(path.join(__dirname,'..','locales'));
+// FOIRE: const LOCALES_FOLDER = path.join(process.env.APP_PATH || __dirname, 'lib', 'locales'); // correction bug \#177
+// FOIRE const LOCALES_FOLDER = process.env.APP_PATH 
+//   ? path.join(process.env.APP_PATH, 'lib', 'locales')
+//   : path.resolve(path.join(__dirname, '..', 'locales'));
+
+const LOCALES_FOLDER = typeof process !== 'undefined' && process.env?.APP_PATH
+  ? path.join(process.env.APP_PATH, 'lib', 'locales')
+  : path.resolve(path.join(__dirname, '..', 'locales'));
 
 // const SERVER_SIDE = typeof window === 'undefined';
+
+console.log('LOCALES_FOLDER =', LOCALES_FOLDER);
 
 /**
  * Service de LOCALISATION

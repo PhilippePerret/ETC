@@ -41,6 +41,11 @@ const HOST = `http://localhost:${PORT}`;
 
 
 const serverPath = path.join(__dirname, '..', 'lib', 'server', 'server.ts').replace('app.asar', 'app.asar.unpacked');
+log.info("serverPath:", serverPath);
+
+const cwdPath = path.join(__dirname, '..').replace('app.asar', 'app.asar.unpacked')
+log.info("cwdPath:", cwdPath);
+
 const envProps = { 
   ...process.env, 
   USER_DATA_PATH: userDataPath,
@@ -48,13 +53,13 @@ const envProps = {
   ETC_MODE: app.isPackaged ? 'prod' : 'dev',
   NODE_ENV: process.env.NODE_ENV || (app.isPackaged ? 'prod' : 'dev'),
   PORT: PORT,
-  HOST: HOST
+  HOST: HOST,
+  NODE_PATH: path.join(cwdPath, 'node_modules'),  // Essai pour résoudre bug \#177
+  BUN_INSTALL: cwdPath // Essai pour résoudre bug \#177
 }
-const cwdPath = path.join(__dirname, '..').replace('app.asar', 'app.asar.unpacked')
 
 function startAServer(onReady){
   server = spawn(bunPath, ['--no-cache', 'run', serverPath], {
-    // cwd: path.join(__dirname, '..'), // ORIGINAL
     cwd: cwdPath,
     env: envProps
   });
@@ -129,6 +134,9 @@ app.whenReady().then(() => {
   });
 
 });
+
+log.info("app.getAppPath():", app.getAppPath());
+log.info("process.resourcesPath:", process.resourcesPath);
 
 /**
  * Quand on quitte l'application (donc Electron), il faut aussi

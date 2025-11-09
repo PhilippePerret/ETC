@@ -7,3 +7,10 @@ Refactoring ActivityTracker
 - Le watcher est maintenant autonome et contient toute la logique de surveillance des fichiers
 - Bug identifié et corrigé dans isUserWorkingOnProject : logique d'ajout au checkedPaths défaillante empêchait parcours récursif complet
 - Surveillance d'activité maintenant fonctionnelle, détecte correctement l'activité dans tous les sous-dossiers
+
+2025-11-08:
+- Problème: l'app fonctionne depuis dist/ mais pas après déplacement vers /Applications
+- Fenêtre blanche, même après remise en place dans dist/
+- Investigation: app supprimée d'/Applications, besoin de reproduire le problème
+- Problème identifié: Bun ne trouve pas express car mauvais cwd
+- Solution: ajout de --cwd dans les arguments Bun
