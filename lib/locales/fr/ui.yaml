@@ -9,6 +9,7 @@ ui:
     mode: '' # renseigné au chargement
   button:
     abandon: Renoncer
+    add_time: "Ajouter…"
     cancel: Annuler
     change: UNE AUTRE
     close: Fermer
@@ -95,6 +96,7 @@ ui:
     temp_description: "Description de votre projet/tâche. Mettre en actif pour l'activer."
     time_left: Temps restant
     to_add_a_work: "Pour ajouter/créer une tâche"
+    to_add_time: "Pour ajouter du temps de travail au travail courant"
     to_choose_another_work: "Pour changer de tâche (mais attention : une seule fois par session !"
     to_destroy: Pour détruire définitivement
     to_edit_works_and_data: Pour éditer les tâches et les données générales

@@ -215,6 +215,14 @@ export class UI { /* singleton ui */
     if ( result.ok ) { Flash.success(t('folder.opened_in_finder')) }
     return false;
   }
+
+  /**
+   * Pour ajouter du temps de travail au travail courant
+   */
+  private async onAddTime(ev: Event){
+    ev && stopEvent(ev)
+    Flash.notice("Je dois apprendre à ajouter du temps.");
+  }
   
   private btnStart?: Button;
   private btnRestart?: Button;
@@ -223,6 +231,7 @@ export class UI { /* singleton ui */
   private btnChange?: Button;
   private btnRunScript?: Button;
   private btnOpenFolder?: Button;
+  private AddTime?: Button;
 
 
   private get buttons(){
@@ -259,8 +268,10 @@ export class UI { /* singleton ui */
       ['Start', t('ui.button.start'), this.onStart.bind(this), false, 1,
         t('ui.text.to_start_working_on_work')],
       ['Restart', t('ui.button.restart'), this.onRestart.bind(this), true, 1,
-        t('ui.text.to_restart_work_on_work')]
-      ];
+        t('ui.text.to_restart_work_on_work')],
+      ['AddTime', t('ui.button.add_time'), this.onAddTime.bind(this), false, 2,
+        t('ui.text.to_add_time')]
+    ];
   }
 
   private static inst: UI;

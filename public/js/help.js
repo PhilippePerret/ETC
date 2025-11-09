@@ -3794,22 +3794,6 @@ var require_browser = __commonJS((exports, module) => {
     }
   };
 });
-
-// node_modules/electron-log/renderer.js
-var require_renderer = __commonJS((exports, module) => {
-  module.exports = {
-    info: (...args) => console.log("[INFO]", ...args),
-    error: (...args) => console.error("[ERROR]", ...args),
-    warn: (...args) => console.warn("[WARN]", ...args),
-    debug: (...args) => console.log("[DEBUG]", ...args),
-    log: (...args) => console.log(...args),
-    initialize: () => {},
-    transports: {
-      file: { level: "info" },
-      console: { level: "info" }
-    }
-  };
-});
 // lib/client/Clock.ts
 init_flash();
 
@@ -3918,9 +3902,11 @@ class Clock {
     this.state = "paused";
   }
   stop() {
-    clearInterval(this.timer);
-    delete this.timer;
-    this.endCurrentTimeSegment();
+    if (this.state !== "paused") {
+      clearInterval(this.timer);
+      delete this.timer;
+      this.endCurrentTimeSegment();
+    }
     this.clockContainer.classList.add("hidden");
     this.state = "stopped";
     return this.totalTime;
@@ -16112,8 +16098,28 @@ function markdown(md) {
 // lib/client/work.ts
 init_utils();
 init_Locale();
-var import_renderer = __toESM(require_renderer(), 1);
 
+// lib/shared/log.ts
+class Log {
+  info(message, data = undefined) {
+    console.log(message, data);
+  }
+  warn(message, data = undefined) {
+    console.warn(message, data);
+  }
+  error(message, data = undefined) {
+    console.error(message, data);
+  }
+  constructor() {}
+  static _inst;
+  static singleton() {
+    return this._inst || (this._inst = new Log);
+  }
+}
+var log = Log.singleton();
+var log_default = log;
+
+// lib/client/work.ts
 class Work {
   data;
   static async init() {
@@ -16153,7 +16159,7 @@ class Work {
       work: this.data,
       changelog
     };
-    import_renderer.default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
+    log_default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
     const result = await postToServer("/work/save-session", dataServer);
     if (stopReport.desactivate) {
       Flash.notice(t("work.desactivated"));
@@ -16228,7 +16234,8 @@ class Work {
       Pause: clock.state === "running",
       Change: options.canChange,
       runScript: !!this.data.script,
-      openFolder: !!this.data.folder
+      openFolder: !!this.data.folder,
+      AddTime: true
     });
     this.setScriptButton();
     clock.reset();
@@ -16292,8 +16299,6 @@ class Work {
 init_utils();
 
 // lib/client/Dialog.ts
-var import_renderer2 = __toESM(require_renderer(), 1);
-
 class Dialog {
   data;
   static items = {};
@@ -16321,7 +16326,7 @@ class Dialog {
     }
   }
   show(values2 = undefined) {
-    import_renderer2.default.info("-> Dialog.show");
+    log_default.info("-> Dialog.show");
     this._built || this.build();
     const detempCode = this.detemplatize(values2);
     this.box.classList.remove("hidden");
@@ -16329,10 +16334,10 @@ class Dialog {
     if (this.data.timeout) {
       this.timer = setTimeout(this.onTimeout.bind(this), this.data.timeout * 1000);
     }
-    import_renderer2.default.info("<- Dialog.show");
+    log_default.info("<- Dialog.show");
   }
   async showAsync(values2 = undefined) {
-    import_renderer2.default.info("-> Dialog.showAsync");
+    log_default.info("-> Dialog.showAsync");
     return new Promise((resolve2, _reject) => {
       this.resolve = resolve2;
       this.data.buttons.forEach((button) => {
@@ -16452,40 +16457,44 @@ class Dialog {
 
 // lib/client/activityTracker.ts
 init_Locale();
-var import_renderer3 = __toESM(require_renderer(), 1);
-
 class ActivityTracker {
   static CHECK_INTERVAL = 15 * 60 * 1000;
   static timer;
   static inactiveUser;
+  static state = "stopped";
   static startControl() {
     this.timer = setInterval(this.control.bind(this), this.CHECK_INTERVAL);
+    this.state = "running";
   }
   static stopControl() {
+    if (this.state === "stopped") {
+      return;
+    }
     if (this.timer) {
       clearInterval(this.timer);
       delete this.timer;
     }
+    this.state = "stopped";
   }
   static inactiveUserCorrection(workingTime) {
-    console.log("Working time : ", workingTime);
+    log_default.info("Working time : ", workingTime);
     if (this.inactiveUser) {
-      console.log("Working time rectifié : ", workingTime - this.CHECK_INTERVAL / 2 / 1000);
+      log_default.info("Working time rectifié : ", workingTime - this.CHECK_INTERVAL / 2 / 1000);
       return workingTime - this.CHECK_INTERVAL / 2 / 1000;
     } else {
       return workingTime;
     }
   }
   static async control() {
-    import_renderer3.default.info("-> ActivityTracker.control");
+    log_default.info("-> ActivityTracker.control");
     const result = await postToServer("/work/check-activity", {
       projectFolder: Work.currentWork.folder,
       lastCheck: Date.now() - this.CHECK_INTERVAL
     });
-    import_renderer3.default.info(`Retour de control: ${JSON.stringify(result)}`);
+    log_default.info(`Retour de control: ${JSON.stringify(result)}`);
     if (result.ok) {
       if (result.isActive === false) {
-        import_renderer3.default.info("--- Activer la fenêtre de demande d’activité ---");
+        log_default.info("--- Activer la fenêtre de demande d’activité ---");
         window.electronAPI.bringToFront();
         this.dialogActivity.show();
       }
@@ -16664,6 +16673,10 @@ class UI {
     }
     return false;
   }
+  async onAddTime(ev) {
+    ev && stopEvent2(ev);
+    Flash.notice("Je dois apprendre à ajouter du temps.");
+  }
   btnStart;
   btnRestart;
   btnPause;
@@ -16671,6 +16684,7 @@ class UI {
   btnChange;
   btnRunScript;
   btnOpenFolder;
+  AddTime;
   get buttons() {
     this._buttons || this.instancieButtons();
     return this._buttons;
@@ -16746,6 +16760,14 @@ class UI {
         true,
         1,
         t("ui.text.to_restart_work_on_work")
+      ],
+      [
+        "AddTime",
+        t("ui.button.add_time"),
+        this.onAddTime.bind(this),
+        false,
+        2,
+        t("ui.text.to_add_time")
       ]
     ];
   }

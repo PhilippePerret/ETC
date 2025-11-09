@@ -9,6 +9,7 @@ ui:
     mode: '' # renseigné au chargement
   button:
     abandon: Abandon
+    add_time: "Add…"
     cancel: Cancel
     change: CHANGE
     close: Close
@@ -95,6 +96,7 @@ ui:
     temp_description: "Description of your project/work.Set active to true to active it."
     time_left: Time left
     to_add_a_work: To create a new work
+    to_add_time: "To add time to current work."
     to_choose_another_work: "To change work (but be careful: only once per session!)"
     to_destroy: To destroy
     to_edit_works_and_data: To edit works and general data

@@ -33,22 +33,6 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
-// node_modules/electron-log/renderer.js
-var require_renderer = __commonJS((exports, module) => {
-  module.exports = {
-    info: (...args) => console.log("[INFO]", ...args),
-    error: (...args) => console.error("[ERROR]", ...args),
-    warn: (...args) => console.warn("[WARN]", ...args),
-    debug: (...args) => console.log("[DEBUG]", ...args),
-    log: (...args) => console.log(...args),
-    initialize: () => {},
-    transports: {
-      file: { level: "info" },
-      console: { level: "info" }
-    }
-  };
-});
-
 // node:path
 function assertPath(path) {
   if (typeof path !== "string")
@@ -10210,8 +10194,27 @@ var require_dist = __commonJS((exports) => {
   exports.default = CronExpressionParser_1.CronExpressionParser;
 });
 
+// lib/shared/log.ts
+class Log {
+  info(message, data = undefined) {
+    console.log(message, data);
+  }
+  warn(message, data = undefined) {
+    console.warn(message, data);
+  }
+  error(message, data = undefined) {
+    console.error(message, data);
+  }
+  constructor() {}
+  static _inst;
+  static singleton() {
+    return this._inst || (this._inst = new Log);
+  }
+}
+var log = Log.singleton();
+var log_default = log;
+
 // lib/client/main.ts
-var import_renderer6 = __toESM(require_renderer(), 1);
 init_Locale();
 // lib/client/work.ts
 init_flash();
@@ -22319,8 +22322,6 @@ function markdown(md) {
 // lib/client/work.ts
 init_utils();
 init_Locale();
-var import_renderer = __toESM(require_renderer(), 1);
-
 class Work {
   data;
   static async init() {
@@ -22360,7 +22361,7 @@ class Work {
       work: this.data,
       changelog
     };
-    import_renderer.default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
+    log_default.info("[addTimeAndSave] Enregistrement temps, rapport et changelog", dataServer);
     const result = await postToServer("/work/save-session", dataServer);
     if (stopReport.desactivate) {
       Flash.notice(t("work.desactivated"));
@@ -22435,7 +22436,8 @@ class Work {
       Pause: clock.state === "running",
       Change: options.canChange,
       runScript: !!this.data.script,
-      openFolder: !!this.data.folder
+      openFolder: !!this.data.folder,
+      AddTime: true
     });
     this.setScriptButton();
     clock.reset();
@@ -22499,8 +22501,6 @@ class Work {
 init_utils();
 
 // lib/client/Dialog.ts
-var import_renderer2 = __toESM(require_renderer(), 1);
-
 class Dialog {
   data;
   static items = {};
@@ -22528,7 +22528,7 @@ class Dialog {
     }
   }
   show(values2 = undefined) {
-    import_renderer2.default.info("-> Dialog.show");
+    log_default.info("-> Dialog.show");
     this._built || this.build();
     const detempCode = this.detemplatize(values2);
     this.box.classList.remove("hidden");
@@ -22536,10 +22536,10 @@ class Dialog {
     if (this.data.timeout) {
       this.timer = setTimeout(this.onTimeout.bind(this), this.data.timeout * 1000);
     }
-    import_renderer2.default.info("<- Dialog.show");
+    log_default.info("<- Dialog.show");
   }
   async showAsync(values2 = undefined) {
-    import_renderer2.default.info("-> Dialog.showAsync");
+    log_default.info("-> Dialog.showAsync");
     return new Promise((resolve2, _reject) => {
       this.resolve = resolve2;
       this.data.buttons.forEach((button) => {
@@ -22659,40 +22659,44 @@ class Dialog {
 
 // lib/client/activityTracker.ts
 init_Locale();
-var import_renderer3 = __toESM(require_renderer(), 1);
-
 class ActivityTracker {
   static CHECK_INTERVAL = 15 * 60 * 1000;
   static timer;
   static inactiveUser;
+  static state = "stopped";
   static startControl() {
     this.timer = setInterval(this.control.bind(this), this.CHECK_INTERVAL);
+    this.state = "running";
   }
   static stopControl() {
+    if (this.state === "stopped") {
+      return;
+    }
     if (this.timer) {
       clearInterval(this.timer);
       delete this.timer;
     }
+    this.state = "stopped";
   }
   static inactiveUserCorrection(workingTime) {
-    console.log("Working time : ", workingTime);
+    log_default.info("Working time : ", workingTime);
     if (this.inactiveUser) {
-      console.log("Working time rectifié : ", workingTime - this.CHECK_INTERVAL / 2 / 1000);
+      log_default.info("Working time rectifié : ", workingTime - this.CHECK_INTERVAL / 2 / 1000);
       return workingTime - this.CHECK_INTERVAL / 2 / 1000;
     } else {
       return workingTime;
     }
   }
   static async control() {
-    import_renderer3.default.info("-> ActivityTracker.control");
+    log_default.info("-> ActivityTracker.control");
     const result = await postToServer("/work/check-activity", {
       projectFolder: Work.currentWork.folder,
       lastCheck: Date.now() - this.CHECK_INTERVAL
     });
-    import_renderer3.default.info(`Retour de control: ${JSON.stringify(result)}`);
+    log_default.info(`Retour de control: ${JSON.stringify(result)}`);
     if (result.ok) {
       if (result.isActive === false) {
-        import_renderer3.default.info("--- Activer la fenêtre de demande d’activité ---");
+        log_default.info("--- Activer la fenêtre de demande d’activité ---");
         window.electronAPI.bringToFront();
         this.dialogActivity.show();
       }
@@ -22871,6 +22875,10 @@ class UI {
     }
     return false;
   }
+  async onAddTime(ev) {
+    ev && stopEvent2(ev);
+    Flash.notice("Je dois apprendre à ajouter du temps.");
+  }
   btnStart;
   btnRestart;
   btnPause;
@@ -22878,6 +22886,7 @@ class UI {
   btnChange;
   btnRunScript;
   btnOpenFolder;
+  AddTime;
   get buttons() {
     this._buttons || this.instancieButtons();
     return this._buttons;
@@ -22953,6 +22962,14 @@ class UI {
         true,
         1,
         t("ui.text.to_restart_work_on_work")
+      ],
+      [
+        "AddTime",
+        t("ui.button.add_time"),
+        this.onAddTime.bind(this),
+        false,
+        2,
+        t("ui.text.to_add_time")
       ]
     ];
   }
@@ -23118,9 +23135,11 @@ class Clock {
     this.state = "paused";
   }
   stop() {
-    clearInterval(this.timer);
-    delete this.timer;
-    this.endCurrentTimeSegment();
+    if (this.state !== "paused") {
+      clearInterval(this.timer);
+      delete this.timer;
+      this.endCurrentTimeSegment();
+    }
     this.clockContainer.classList.add("hidden");
     this.state = "stopped";
     return this.totalTime;
@@ -23457,8 +23476,6 @@ class Tools {
 var tools = Tools.getInstance();
 
 // lib/client/prefs.ts
-var import_renderer4 = __toESM(require_renderer(), 1);
-
 class Prefs {
   data;
   fieldsReady = false;
@@ -23470,7 +23487,7 @@ class Prefs {
   async init() {
     const retour = await postToServer("/prefs/load", { process: "Prefs.init" });
     if (retour.ok) {
-      import_renderer4.default.info("Prefs loaded", retour.prefs);
+      log_default.info("Prefs loaded", retour.prefs);
       this.setData(retour.prefs);
       this.observeButtons();
     }
@@ -23754,7 +23771,6 @@ var WORK_PROPS = Object.keys(DEFAULT_WORK);
 init_flash();
 init_utils();
 init_Locale();
-var import_renderer5 = __toESM(require_renderer(), 1);
 var import_cron_parser = __toESM(require_dist(), 1);
 class Editing {
   originalWorks;
@@ -23781,8 +23797,8 @@ class Editing {
     const works = retour.works;
     const order2 = retour.order || works.map((w) => w.id);
     this.originalOrder = order2.join(":");
-    import_renderer5.default.info("Works retreaved", works);
-    import_renderer5.default.info("Order retreaved", order2);
+    log_default.info("Works retreaved", works);
+    log_default.info("Order retreaved", order2);
     this.originalWorks = {};
     works.forEach((w) => Object.assign(this.originalWorks, { [w.id]: w }));
     order2.forEach((workId) => {
@@ -23811,7 +23827,7 @@ class Editing {
       return;
     } else if (collectedData.length === 0 && this.orderHasNotChanged()) {
       Flash.notice(t("work.unchanged"));
-      import_renderer5.default.info("--- PAS D'ENREGISTREMENT ---");
+      log_default.info("--- PAS D'ENREGISTREMENT ---");
       return;
     }
     const retour = await postToServer("/works/save", {
@@ -23870,7 +23886,7 @@ class Editing {
           console.error(`[collectTaskData] Unable to find (form) div#work-${idw} (idw = ${idw})…`);
         }
       }
-      import_renderer5.default.info("--- DES ERREURS SONT SURVENUES ---");
+      log_default.info("--- DES ERREURS SONT SURVENUES ---");
       return null;
     } else {
       return Object.values(this.changesetWorks).filter((ch) => ch.count > 0).map((ch) => this.modifiedWorks[ch.id]);
@@ -23878,13 +23894,13 @@ class Editing {
   }
   async checkChangeset(changeset, errorCount) {
     const idw = changeset.id;
-    import_renderer5.default.info("Check des changements du travail ", idw, changeset.change);
+    log_default.info(`Check des changements du travail ${idw}`, changeset.change);
     if (changeset.count === 0) {
       return errorCount;
     }
     for (const prop of changeset.change) {
       let newValue = this.modifiedWorks[idw][prop];
-      import_renderer5.default.info("Check de prop '%s' de nouvelle valeur %s", prop, newValue);
+      log_default.info(`Check de prop '${prop}' de nouvelle valeur ${newValue}`);
       switch (prop) {
         case "project":
           if (newValue === "") {
@@ -23927,13 +23943,13 @@ class Editing {
         case "cron":
           if (newValue !== "") {
             try {
-              import_renderer5.default.info("Check de newValue", newValue);
+              log_default.info("Check de newValue", newValue);
               if (newValue.split(" ").length === 5) {
                 newValue = `* ${newValue}`;
                 this.modifiedWorks[idw]["con"] = newValue;
               }
               const interval = import_cron_parser.CronExpressionParser.parse(newValue, { strict: true });
-              import_renderer5.default.info("Interval", interval.next());
+              log_default.info("Interval", interval.next());
             } catch (error) {
               Object.assign(changeset.errors, { cron: t("error.data.cron_invalid", [newValue]) });
               ++errorCount;
@@ -23942,7 +23958,7 @@ class Editing {
           break;
       }
     }
-    import_renderer5.default.info("errorCount end checkChangeset: %i", errorCount);
+    log_default.info("errorCount end checkChangeset: %i", errorCount);
     return errorCount;
   }
   async IDAlreadyExists(id) {
@@ -24228,7 +24244,7 @@ class Editing {
     if (this.isOriginalListDifferentFromCurrent()) {
       const retour = await this.closeConfirmDialog.showAsync();
       if (retour === "cancel") {
-        import_renderer5.default.info("Abandon de la fermeture");
+        log_default.info("Abandon de la fermeture");
         return false;
       }
     } else {
@@ -24304,7 +24320,7 @@ var editor = Editing.singleton();
 // lib/client/main.ts
 class Client {
   async init() {
-    import_renderer6.default.info("=== INITIALISATION CLIENT ===");
+    log_default.info("=== INITIALISATION CLIENT ===");
     await this.initObjet(prefs_default, "Prefs");
     await this.initObjet(loc, "Locale", prefs_default.getLang());
     this.initObjetSync(ui, "UI", prefs_default.getSavedData());
@@ -24321,7 +24337,7 @@ class Client {
     console.log("Il a répondu non");
   }
   initObjetSync(objet, name, args) {
-    import_renderer6.default.info(`${name} init…`);
+    log_default.info(`${name} init…`);
     let res;
     if (args) {
       res = objet.init(args);
@@ -24329,13 +24345,13 @@ class Client {
       res = objet.init();
     }
     if (res) {
-      import_renderer6.default.info("  -- ok");
+      log_default.info("  -- ok");
     } else {
-      import_renderer6.default.warn(`Problem with ${name} initialisation`);
+      log_default.warn(`Problem with ${name} initialisation`);
     }
   }
   async initObjet(objet, name, args) {
-    import_renderer6.default.info(`${name} init…`);
+    log_default.info(`${name} init…`);
     let res;
     if (args) {
       res = await objet.init(args);
@@ -24343,9 +24359,9 @@ class Client {
       res = await objet.init();
     }
     if (res) {
-      import_renderer6.default.info("  -- ok");
+      log_default.info("  -- ok");
     } else {
-      import_renderer6.default.warn(`Problem with ${name} initialisation`);
+      log_default.warn(`Problem with ${name} initialisation`);
     }
   }
   static inst;

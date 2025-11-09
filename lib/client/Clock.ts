@@ -171,9 +171,11 @@ class Clock { /* singleton clock */
    * @returns Temps total de travail
    */
   public stop(): number {
-    clearInterval(this.timer);
-    delete (this as any).timer;
-    this.endCurrentTimeSegment();
+    if ( this.state !== 'paused' ) {
+      clearInterval(this.timer);
+      delete (this as any).timer;
+      this.endCurrentTimeSegment();
+    }
     this.clockContainer.classList.add('hidden');
     this.state = 'stopped';
     return this.totalTime;

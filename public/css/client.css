@@ -77,6 +77,16 @@ div#dev-light {
   text-transform: uppercase;
 }
 
+button#btn-AddTime {
+  float: left;
+}
+
+/* 
+
+  === HELP ===
+
+*/
+
 section#help {
   margin-top: -2em;
   padding: 1em 3em;

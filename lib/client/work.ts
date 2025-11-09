@@ -157,6 +157,7 @@ export class Work {
       Change: options.canChange,
       runScript: !!this.data.script,
       openFolder: !!this.data.folder,
+      AddTime: true
     });
     this.setScriptButton()
     // Surtout pour supprimer le fond (orange/rouge) précédent
