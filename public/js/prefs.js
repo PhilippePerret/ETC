@@ -16029,6 +16029,9 @@ class Work {
   get id() {
     return this.data.id;
   }
+  get project() {
+    return this.data.project;
+  }
   get script() {
     return this.data.script;
   }
@@ -16170,6 +16173,9 @@ class Dialog {
   }
   resolve;
   onClickButtonWithValue(value, ev) {
+    if (this.data.answer) {
+      value = [value, DGet("input.dialog-answer", this.box).value];
+    }
     this.resolve(value);
   }
   close() {
@@ -16183,13 +16189,23 @@ class Dialog {
   onClickButton(callback, ev) {
     ev && stopEvent(ev);
     this.close();
-    return callback && callback();
+    let answer = undefined;
+    if (this.data.answer) {
+      answer = DGet("input.dialog-answer", this.box);
+    }
+    return callback && callback(answer);
   }
   onCancel() {
     return this.onClickButton(this.cancelFunction);
   }
   onDefault() {
     return this.onClickButton(this.defaultFunction);
+  }
+  onFocusInAnswer(ev) {
+    this.decourcircuiteKeyboard();
+  }
+  onBlurFromAnswer(ev) {
+    this.courtcircuiteKeyboard();
   }
   courtcircuiteKeyboard() {
     this._oldKeyDownFunction = window.onkeydown;
@@ -16242,6 +16258,15 @@ class Dialog {
     i2.className = "dialog-icon";
     o.appendChild(i2);
     i2.setAttribute("src", this.data.icon);
+    if (this.data.answer) {
+      const a = document.createElement("INPUT");
+      a.className = "dialog-answer";
+      a.type = "text";
+      a.value = this.data.answer;
+      o.appendChild(a);
+      a.addEventListener("focus", this.onFocusInAnswer.bind(this));
+      a.addEventListener("blur", this.onBlurFromAnswer.bind(this));
+    }
     const bts = document.createElement("DIV");
     bts.className = "buttons";
     o.appendChild(bts);
@@ -16495,7 +16520,27 @@ class UI {
   }
   async onAddTime(ev) {
     ev && stopEvent2(ev);
-    Flash.notice("Je dois apprendre à ajouter du temps.");
+    const dialog = new Dialog({
+      id: "fen-add-time",
+      title: "Ajout de temps",
+      message: `Combien de temps de travail voulez-vous ajouter au travail _0_ ?
+
+<em>(la durée doit être donnée en minutes)</em>`,
+      answer: "120",
+      buttons: [
+        { text: "Ajouter", onclick: "ok", role: "default" },
+        { text: "Renoncer", onclick: "cancel", role: "cancel" }
+      ],
+      icon: "images/icon.png"
+    });
+    let answer, button;
+    [button, answer] = await dialog.showAsync([Work.currentWork.project]);
+    if (button === "ok") {
+      Work.addTimeToCurrentWork(Number(answer));
+    }
+  }
+  cancel(ev) {
+    ev && stopEvent2(ev);
   }
   btnStart;
   btnRestart;

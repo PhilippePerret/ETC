@@ -6,6 +6,7 @@ import { Flash } from "../../public/js/flash";
 import { t } from '../shared/Locale';
 import { postToServer } from "./utils";
 import type { RecType } from "../shared/types";
+import { Dialog } from "./Dialog";
 
 function stopEvent(ev: Event){
   ev.stopPropagation();
@@ -221,7 +222,26 @@ export class UI { /* singleton ui */
    */
   private async onAddTime(ev: Event){
     ev && stopEvent(ev)
-    Flash.notice("Je dois apprendre à ajouter du temps.");
+    const dialog = new Dialog({
+      id: 'fen-add-time',
+      title: "Ajout de temps",
+      message: "Combien de temps de travail voulez-vous ajouter au travail _0_ ?\n\n<em>(la durée doit être donnée en minutes)</em>",
+      answer: '120',
+      buttons: [
+        {text: "Ajouter", onclick: 'ok', role: 'default'},
+        {text: 'Renoncer', onclick: 'cancel', role: 'cancel'}
+      ],
+      icon: 'images/icon.png',
+    });
+    let answer: string, button: string;
+    [button, answer] = await dialog.showAsync([Work.currentWork.project]);
+    if ( button === 'ok' ) {
+      Work.addTimeToCurrentWork(Number(answer));
+    }
+  }
+
+  public cancel(ev: Event){
+    ev && stopEvent(ev);
   }
   
   private btnStart?: Button;

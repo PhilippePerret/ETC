@@ -31,7 +31,6 @@ export class Work {
    */
   public static async addTimeToCurrentWork(time: number){
     if ( time ) {
-    // if ( true ) {
       await this.currentWork.addTimeAndSave(time)
     } else {
       Flash.error(t('times.to_short_to_be_saved'))
@@ -135,6 +134,7 @@ export class Work {
   }
 
   public get id(){ return this.data.id; }
+  public get project(): string {return this.data.project}
   public get script(): string | undefined {return this.data.script}
   public get folder(): string | undefined {return this.data.folder}
   public get leftTime(): number {return this.data.leftTime}

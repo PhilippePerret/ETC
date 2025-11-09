@@ -45,6 +45,12 @@ div.dialog img.dialog-icon {
   left: 2.4vw;
   width: 8vw;
 }
+
+div.dialog input.dialog-answer {
+  margin-left: 2em;
+  width: calc(100% - 6em);
+}
+
 div.dialog div.buttons {
   padding: 1em 2em;
 }

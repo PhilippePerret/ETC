@@ -29,6 +29,10 @@
  *  const retour: any = await (new Dialog({...}).showAsync([...]))
  *  if (retour = ....) { .... }
  * 
+ * Si une réponse (answer) est attendue, elle sera renvoyée en deuxième argument
+ * donc le retour recevra [<valeur bouton>, <réponse données>]
+ * 
+ * 
  * Usage
  * -----
  *  
@@ -57,7 +61,7 @@
 import log from '../shared/log';
 import type { RecType, ButtonType } from '../shared/types';
 import type { KeyboardEvent } from 'react';
-import { stopEvent } from '../../public/js/dom';
+import { DGet, stopEvent } from '../../public/js/dom';
 
 export class Dialog {
 
@@ -96,6 +100,7 @@ export class Dialog {
       id?: string,
       title?: string,
       message: string,
+      answer?: string,
       defaultAnswer?: string, // pour une demande
       buttons: ButtonType[],
       timeout?: number,
@@ -138,6 +143,9 @@ export class Dialog {
   // Quand onclick est défini par une valeur plutôt que par une
   // fonction
   private onClickButtonWithValue(value: any, ev: MouseEvent){
+    if (this.data.answer) {
+      value = [value, DGet('input.dialog-answer', this.box).value];
+    }
     (this.resolve as Function)(value);
   }
 
@@ -153,11 +161,22 @@ export class Dialog {
   onClickButton(callback: Function | undefined, ev?: MouseEvent){
     ev && stopEvent(ev);
     this.close();
-    return callback && callback();
+    let answer = undefined;
+    if (this.data.answer){ answer = DGet('input.dialog-answer', this.box) }
+    return callback && callback(answer);
   }
   // Par raccourci clavier
   onCancel(){return this.onClickButton(this.cancelFunction)}
   onDefault(){return this.onClickButton(this.defaultFunction)}
+
+  // Le focus et le blur dans le champ de réponse doit désactiver les raccourcis
+  // clavier
+  onFocusInAnswer(ev: Event){
+    this.decourcircuiteKeyboard()
+  }
+  onBlurFromAnswer(ev: Event){
+    this.courtcircuiteKeyboard()
+  }
 
   courtcircuiteKeyboard(){
     this._oldKeyDownFunction = (window as any).onkeydown;
@@ -214,6 +233,16 @@ export class Dialog {
     i.className = 'dialog-icon';
     o.appendChild(i);
     i.setAttribute('src', this.data.icon);
+    // S'il faut donner une réponse
+    if (this.data.answer) {
+      const a = document.createElement('INPUT') as HTMLInputElement;
+      a.className = 'dialog-answer';
+      a.type = 'text';
+      a.value = this.data.answer;
+      o.appendChild(a);
+      a.addEventListener('focus', this.onFocusInAnswer.bind(this));
+      a.addEventListener('blur', this.onBlurFromAnswer.bind(this));
+    }
     const bts = document.createElement('DIV');
     bts.className = 'buttons';
     o.appendChild(bts);
