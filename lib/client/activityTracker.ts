@@ -11,22 +11,35 @@ export class ActivityTracker /* CLIENT */ {
   // private static CHECK_INTERVAL = 3 * 60 * 1000; // test avec 1 minute
   private static timer: NodeJS.Timeout | undefined;
   private static inactiveUser: boolean;
+  private static state: 'stopped' | 'running' = 'stopped';
 
+  /**
+   * Pour démarrer la surveillance.
+   */
   public static startControl(){
     this.timer = setInterval(this.control.bind(this), this.CHECK_INTERVAL)
+    this.state = 'running';
   }
 
+  /**
+   * Pour stopper la surveillance.
+   * 
+   * Elle peut être appelée deux fois de suite, par la pause et le
+   * bouton stop ensuite.
+   */
   public static stopControl(){
+    if ( this.state === 'stopped' ) { return /* rien à faire */}
     if (this.timer) {
       clearInterval(this.timer);
       delete this.timer;
     }
+    this.state = 'stopped';
   }
 
   public static inactiveUserCorrection(workingTime: number): number {
-    console.log("Working time : ", workingTime);
+    log.info("Working time : ", workingTime);
     if ( this.inactiveUser ) {
-      console.log("Working time rectifié : ", workingTime - ((this.CHECK_INTERVAL / 2) / 1000))
+      log.info("Working time rectifié : ", workingTime - ((this.CHECK_INTERVAL / 2) / 1000))
       return workingTime - ((this.CHECK_INTERVAL / 2) / 1000);
     } else {
       return workingTime;
