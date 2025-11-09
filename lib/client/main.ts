@@ -1,4 +1,4 @@
-import log from 'electron-log/renderer';
+import log from '../shared/log';
 import { loc, t } from '../shared/Locale';
 import prefs from './prefs';
 import { Work } from './work';

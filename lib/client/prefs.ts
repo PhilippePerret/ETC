@@ -6,7 +6,7 @@ import { ui } from "./ui";
 import { listenBtn, postToServer } from "./utils";
 import { t } from '../shared/Locale';
 import { tools } from "./tools";
-import log from 'electron-log/renderer';
+import log from '../shared/log';
 
 export class Prefs { /* singleton */
 

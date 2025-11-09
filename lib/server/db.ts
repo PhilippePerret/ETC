@@ -7,7 +7,7 @@ import { ENV, userDataPath } from './constants_server';
 import { startOfToday } from '../shared/utils_shared';
 import { t } from '../shared/Locale';
 import { prefs } from './prefs';
-import log from 'electron-log/main';
+import log from '../shared/log';
 import { CronExpressionParser } from 'cron-parser';
 
 class DBWorks { /* singleton db */

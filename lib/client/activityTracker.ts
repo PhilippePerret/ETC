@@ -3,7 +3,7 @@ import { ui } from "./ui";
 import { postToServer } from "./utils";
 import { Dialog } from "./Dialog";
 import { t } from '../shared/Locale';
-import log from 'electron-log/renderer';
+import log from '../shared/log';
 
 export class ActivityTracker /* CLIENT */ {
 

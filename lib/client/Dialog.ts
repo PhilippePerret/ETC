@@ -54,7 +54,7 @@
  *  // Attend et traite la réponse en fonction de +data+
  * 
  */
-import log from 'electron-log/renderer';
+import log from '../shared/log';
 import type { RecType, ButtonType } from '../shared/types';
 import type { KeyboardEvent } from 'react';
 import { stopEvent } from '../../public/js/dom';

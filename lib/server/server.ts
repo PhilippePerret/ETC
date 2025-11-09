@@ -1,5 +1,5 @@
 import express from 'express';
-import log from 'electron-log/main';
+import log from '../shared/log';
 import { setupRoutes } from './routes';
 import { HOST, PORT } from '../server/constants_server';
 

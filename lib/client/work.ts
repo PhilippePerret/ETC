@@ -7,7 +7,7 @@ import { EndWorkReport } from "./stop_report";
 import { markdown } from "../shared/utils_shared";
 import { postToServer } from "./utils";
 import { t } from "../shared/Locale";
-import log from "electron-log/renderer";
+import log from '../shared/log';
 
 export class Work {
 

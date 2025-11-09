@@ -1,4 +1,4 @@
-import log from "electron-log/main";
+import log from '../shared/log';
 
 export const userDataPath = process.env.USER_DATA_PATH;
 export const PORT = process.env.PORT;

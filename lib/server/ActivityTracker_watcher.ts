@@ -1,5 +1,5 @@
 // lib/ActivityTracker_worker.ts
-import log from 'electron-log/main';
+import log from '../shared/log';
 import { isUserWorkingOnProject } from './Activity_isUserWorking';
 
 self.addEventListener('message', (event: MessageEvent) => {

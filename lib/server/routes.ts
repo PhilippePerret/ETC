@@ -1,6 +1,6 @@
 import path from 'path';
 import type { Express } from 'express';
-import log from 'electron-log/main';
+import log from '../shared/log';
 import { prefs } from './prefs';
 import { loc, t, tf } from '../shared/Locale';
 import db from './db';

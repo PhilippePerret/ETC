@@ -5,7 +5,7 @@ import { ui } from "./ui";
 import { listenBtn, listenChange, postToServer } from "./utils";
 import { t } from '../shared/Locale';
 import { Work } from "./work";
-import log from 'electron-log/renderer';
+import log from '../shared/log';
 import { Dialog } from "./Dialog";
 import { help } from "./help";
 import { CronExpressionParser } from 'cron-parser';
@@ -212,12 +212,12 @@ class Editing {
    */
   private async checkChangeset(changeset: any, errorCount: number): Promise<number> {
     const idw: string = changeset.id;
-    log.info('Check des changements du travail ', idw, changeset.change);
+    log.info(`Check des changements du travail ${idw}`, changeset.change);
     // console.info('Check des changements du travail ', idw);
     if (changeset.count === 0) { return errorCount } 
     for (const prop of changeset.change) {
       let newValue = (this.modifiedWorks as any)[idw][prop];
-      log.info("Check de prop '%s' de nouvelle valeur %s", prop, newValue);
+      log.info(`Check de prop '${prop}' de nouvelle valeur ${newValue}`);
       switch(prop){
       case 'project':
         if (newValue === '') {

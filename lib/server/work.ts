@@ -1,6 +1,6 @@
 import db from "./db";
 import path from "path";
-import log from 'electron-log/main';
+import log from '../shared/log';
 import { prefs } from "./prefs";
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
 import { t } from '../shared/Locale';
