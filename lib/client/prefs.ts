@@ -8,7 +8,7 @@ import { t } from '../shared/Locale';
 import { tools } from "./tools";
 import log from '../shared/log';
 
-export class Prefs { /* singleton */
+export class Prefs { /* singleton prefs */
 
   private data!: PrefsDataType;
   private fieldsReady: boolean = false;

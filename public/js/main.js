@@ -23978,12 +23978,13 @@ class Editing {
   }
   async checkChangeset(changeset, errorCount) {
     const idw = changeset.id;
+    const modifiedWork = this.modifiedWorks[idw];
     log_default.info(`Check des changements du travail ${idw}`, changeset.change);
     if (changeset.count === 0) {
       return errorCount;
     }
     for (const prop of changeset.change) {
-      let newValue = this.modifiedWorks[idw][prop];
+      let newValue = modifiedWork[prop];
       log_default.info(`Check de prop '${prop}' de nouvelle valeur ${newValue}`);
       switch (prop) {
         case "project":
@@ -24024,13 +24025,25 @@ class Editing {
             ++errorCount;
           }
           break;
+        case "sessionTime":
+          const cycleTime = modifiedWork.cycleTime || prefs_default.getValue("duree");
+          if (newValue) {
+            if (newValue === 0) {
+              Object.assign(changeset.errors, { sessionTime: t("error.data.must_be_greater_than_zero", [t("ui.thing.Session_time")]) });
+              ++errorCount;
+            } else if (newValue >= cycleTime) {
+              Object.assign(changeset.errors, { sessionTime: t("error.data.session_time_must_be_less_than_cycle_time", [newValue, cycleTime]) });
+              ++errorCount;
+            }
+          }
+          break;
         case "cron":
           if (newValue !== "") {
             try {
               log_default.info("Check de newValue", newValue);
               if (newValue.split(" ").length === 5) {
                 newValue = `* ${newValue}`;
-                this.modifiedWorks[idw]["con"] = newValue;
+                modifiedWork.cron = newValue;
               }
               const interval = import_cron_parser.CronExpressionParser.parse(newValue, { strict: true });
               log_default.info("Interval", interval.next());

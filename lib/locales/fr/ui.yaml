@@ -66,6 +66,7 @@ ui:
     Script: Script
     Script_button_name: Nom bouton
     Session_dim: Sess.
+    Session_time: La durée session
     Theme: Thème
     Work: Travail
   adj:

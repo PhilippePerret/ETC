@@ -18,9 +18,11 @@ error:
     folder_required: "Un dossier du travail est requis (cf. manuel)"
     folder_unfound: "Ce dossier est introuvable."
     id_exists: "L’identifiant _0_ est déjà utilisé."
+    must_be_greater_than_zero: "_0_ doit être supérieur à 0."
     script_button_name_to_long: "Ce nom de boutton est trop long (25 max)."
     script_not_executable: "Ce script n'est pas exécutable."
     script_unfound: "Ce script est introuvable."
+    session_time_must_be_less_than_cycle_time: "La durée session (_0_ mns) doit évidemment être inférieure à la durée cycle (_1_ mns). Consultez l'aide, au besoin."
     undefined_project: "Le titre du projet est requis."
 
 files:

@@ -17,9 +17,11 @@ error:
     folder_required: "Folder of work is mandatory (cf. manual)."
     folder_unfound: "this folder of work is unfound."
     id_exists: "_0_ ID is already in use."
+    must_be_greater_than_zero: "_0_ must be greater than 0."
     script_button_name_to_long: "This button name is too long (25 max)."
     script_not_executable: "This script is not executable."
     script_unfound: "_0_ script is unfound."
+    session_time_must_be_less_than_cycle_time: "Session time (_0_ mns) must obviously be less than cycle time (_0_ mns)."
     undefined_project: "Project Title is required."
 
     error_found: "Errors found: _0_."
