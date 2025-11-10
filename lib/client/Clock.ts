@@ -106,15 +106,26 @@ class Clock { /* singleton clock */
     }
   }
 
+  /**
+   * Retourne le temps restant.
+   * 
+   * Pour le moment, ne sert que pour l'affichage du compte à rebours (ne
+   * sert même pas pour faire la différence entre le session time et le
+   * cycleTime)
+   */
   private get totalRestTimeSeconds(){
-    return this._totresttime || (this._totresttime = this.currentWork.leftTime * 60)
-  }; private _totresttime!: number;
+    return this._totresttime || (this._totresttime = this.defSessionLeftTime() * 60)
+  }; 
+  private _totresttime!: number;
+  private defSessionLeftTime(): number {
+    return this.currentWork.sessionTime || this.currentWork.leftTime
+  }
 
   /**
    * Calcul du temps complet de travail depuis le lancement de la 
    * tâche, en sachant que ce travail peut être interrompu (mis en
    * pause). Donc le temps total est enregistré en consignant chaque
-   * tranche de temps travaillée.
+   * tranche de temps effectivement travaillée.
    */
   private calcTotalRecTime(): void {
     this.totalTime = this.timeSegments

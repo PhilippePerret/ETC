@@ -22439,6 +22439,9 @@ class Work {
   get cycleTime() {
     return this.data.cycleTime;
   }
+  get sessionTime() {
+    return this.data.sessionTime;
+  }
   get totalTime() {
     return this.data.totalTime;
   }
@@ -23157,9 +23160,12 @@ class Clock {
     }
   }
   get totalRestTimeSeconds() {
-    return this._totresttime || (this._totresttime = this.currentWork.leftTime * 60);
+    return this._totresttime || (this._totresttime = this.defSessionLeftTime() * 60);
   }
   _totresttime;
+  defSessionLeftTime() {
+    return this.currentWork.sessionTime || this.currentWork.leftTime;
+  }
   calcTotalRecTime() {
     this.totalTime = this.timeSegments.filter((segTime) => !!segTime.laps).reduce((accu, segTime) => accu + segTime.laps, 0);
   }
@@ -23835,6 +23841,7 @@ var DEFAULT_WORK = {
   nextCronDateAt: null,
   totalTime: 0,
   cycleTime: 0,
+  sessionTime: null,
   leftTime: 0,
   cycleCount: 0,
   startedAt: null,

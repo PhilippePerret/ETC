@@ -29,6 +29,7 @@ export interface WorkType {
     defaultLeftTime?: number;
     totalTime: number;  // Le nombre total de minutes de travail
     cycleTime: number;  // Le nombre de minutes travaillées dans le cycle courant
+    sessionTime: number | null; // Durée en minutes d'une session de travail
     leftTime: number;   // Nombre de minutes restant pour finir le cycle
     cycleCount: number; // Nombre de cycles
     startedAt: number;  // Date de démarrage du travail
@@ -50,6 +51,7 @@ export const DEFAULT_WORK = {
   nextCronDateAt: null,
   totalTime: 0,
   cycleTime: 0,
+  sessionTime: null,
   leftTime: 0,
   cycleCount: 0,
   startedAt: null,

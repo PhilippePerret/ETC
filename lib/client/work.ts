@@ -139,6 +139,7 @@ export class Work {
   public get folder(): string | undefined {return this.data.folder}
   public get leftTime(): number {return this.data.leftTime}
   public get cycleTime(): number {return this.data.cycleTime}
+  public get sessionTime(): number | null {return this.data.sessionTime}
   public get totalTime(): number {return this.data.totalTime}
 
   /**
