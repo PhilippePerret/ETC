@@ -102,7 +102,7 @@ class Clock { /* singleton clock */
     if (this.counterMode === 'clock') {
       return '0:00:00';
     } else {
-      return this.s2h(this.currentWork.leftTime * 60);
+      return this.s2h(this.totalRestTimeSeconds);
     }
   }
 
