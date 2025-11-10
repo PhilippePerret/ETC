@@ -244,13 +244,13 @@ class Clock { /* singleton clock */
     /*****************************************************
      * ALERTE SI LE TEMPS DE FIN APPROCHE OU EST ARRIVÉ  *
      *****************************************************/
-    console.log("leftTime = %i", leftTime);
-    if ( this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
+    // console.log("leftTime = %i", leftTime);
+    if ( this.totalLeftTimeMins >= 10 && leftTime < 10 && this.alerte10minsDone === false) {
       // 10 minutes restantes sur ce travail
       this.donneAlerte10mins();
-    } else if (this.alerte10minsDone) {
+    } else if (this.totalLeftTimeMins < 10 || this.alerte10minsDone) {
       // L'alerte des 10 minutes a été donnée
-      if (this.alerteWorkDone === false && leftTime < 0) {
+      if (this.alerteWorkDone === false && leftTime <= 0) {
         /****************************
          * Temps de travail atteint *
          ****************************/

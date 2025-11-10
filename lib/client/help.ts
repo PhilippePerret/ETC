@@ -1,9 +1,10 @@
 import type { RecType } from "../shared/types";
 import { DGet } from "../../public/js/dom";
 import { ui } from "./ui";
-import { tt, t, t_strict } from "../shared/Locale";
+import { tt, t, t_strict, loc } from "../shared/Locale";
 import { markdown } from "../shared/utils_shared";
 import { listenBtn } from "./utils";
+import { Flash } from "../../public/js/flash";
 
 /**
  * Module pour la gestion de l'aide
@@ -90,8 +91,10 @@ t(help.cron.text)
 
 class Help { /* singleton help */
   private constructor(){}
-  public static getInst(){return this.inst || (this.inst = new Help())}
+  public static singleton(){return this.inst || (this.inst = new Help())}
   private static inst: Help;
+
+
   private texts!: string[];
 
   /**
@@ -232,9 +235,118 @@ class Help { /* singleton help */
   public init(): boolean {
     DGet('button.btn-close-help').addEventListener('click', this.close.bind(this));
     listenBtn('help-toggle', this.show.bind(this, ['resume_home_page']));
+    listenBtn('help-search', this.searchHelp.bind(this), this.obj)
     return true;
   }
+
+  private searchHelp(ev: MouseEvent){
+    Flash.notice("Je dois apprendre à chercher dans l'aide")
+    let searched: string = DGet('input#help-search-field', this.obj).value as string;
+    // if (searched.startsWith('/') && searched.endsWith('/')){
+    //   searched = new RegExp(searched.substring(1, searched.length - 1), 'g') as RegExp;
+    // }
+
+    // Todo Comment récupérer tous les textes d'aide ?
+    // En fait, il faut tous les help.<any>.text et les
+    // help.<any>.title
+    const keys = loc.getKeys('help');
+    const locales = loc.getLocales();
+    console.log("Keys", keys);
+    const founds: {[x: string]: {
+      title: string,
+      text: string,
+      extraits: string[]
+    }} = {};
+    keys.forEach((key: string) => {
+      if ( 'object' === typeof locales.help[key] && locales.help[key].title) {
+        // Une aide fouillable
+        const title = t(`help.${key}.title`);
+        const text  = t(`help.${key}.text`);
+        const textLength = text.length;
+        Object.assign(founds, {[key]: {
+          title: title,
+          text: text,
+          extraits: [], 
+          helpId: key
+        }});
+        if (title.indexOf(searched) > -1) {
+          (founds as any)[key].extraits.push(title);
+        }
+        // console.log("Fouiller dans titre : ", title);
+        // console.log("Fouiller dans text", text);
+        const marge = 200 ;
+        let offset = -marge;
+
+        while(offset = text.indexOf(searched, offset + marge - 5)){
+          if (offset < 0 ) { break }
+          // console.log("offset", offset);
+          const prefix:string = offset - 200 > 0 ? '[…] ' : '';
+          const suffix: string = offset + 200 > textLength ? '' : ' […]';
+
+          ((founds as any)[key]).extraits.push(prefix + text.substring(offset - 200, offset + 200) + suffix);
+        }
+      }
+    });
+
+    // console.log("founds = ", founds);
+
+    this.content.innerHTML = '';
+
+    for(var [helpId, dataHelp] of Object.entries(founds)){
+      const extraits = dataHelp.extraits;
+      const title = dataHelp.title;
+      if (extraits.length ) {
+        console.log("Trouvé dans Titre:", title);
+        console.log("Extraits", extraits);
+        // Todo : mettre un lien pour rejoindre l'aide entière
+        // (ou pour l'afficher entière, plutôt, pour pouvoir 
+        // garder les autres)
+        const o = document.createElement('DIV');
+        o.id = `help-${helpId}`;
+        this.content.appendChild(o);
+        o.className = 'help-found-container';
+        const t = document.createElement('DIV');
+        o.appendChild(t);
+        t.className = 'found-title';
+        const l = document.createElement('button');
+        l.className = 'found-show-whole no-btn tiny';
+        l.innerHTML = 'tout afficher';
+        t.appendChild(l);
+        l.addEventListener('click', this.replaceWithWholeHelp.bind(this, helpId))
+        const s = document.createElement('span');
+        s.innerHTML = title;
+        t.appendChild(s);
+
+        const fds = document.createElement('DIV');
+        o.appendChild(fds);
+        fds.className = 'found-extraits';
+        extraits.forEach((extrait: string) => {
+          const regexp = new RegExp(searched, 'g');
+          extrait = extrait.replace(regexp, `<span class="found">${searched}</span>`);
+          const f = document.createElement('DIV');
+          f.className = 'found-extrait';
+          f.innerHTML = extrait;
+          fds.appendChild(f);
+        });
+      }
+    }
+
+  }
+
+  /**
+   * Fonction qui permet, lors d'une recherche, de remplacer les
+   * extraits par l'aide complète.
+   * 
+   * @param helpId Identifiant de l'aide
+   */
+  replaceWithWholeHelp(helpId: string, ev: Event) {
+    const div = DGet(`div#help-${helpId} div.found-extraits`) as HTMLDivElement;
+    div.innerHTML = t(`help.${helpId}.text`);
+    // Il faut supprimer le lien
+    (ev.target as HTMLElement).remove();
+  }
+
 }
 
-export const help = Help.getInst();
+export const help = Help.singleton();
 (window as any).help = help;

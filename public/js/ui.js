@@ -3213,6 +3213,9 @@ class Locale {
   translateText(texte) {
     return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
   }
+  getKeys(key) {
+    return Object.keys(this.locales[key]);
+  }
   translate(route, strict = false) {
     const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
     if (typeof translated === "string") {
@@ -3962,11 +3965,10 @@ class Clock {
       this.cycleTimeField.innerHTML = this.time2horloge(elapsedMinutes);
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
-    console.log("leftTime = %i", leftTime);
-    if (this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
+    if (this.totalLeftTimeMins >= 10 && leftTime < 10 && this.alerte10minsDone === false) {
       this.donneAlerte10mins();
-    } else if (this.alerte10minsDone) {
-      if (this.alerteWorkDone === false && leftTime < 0) {
+    } else if (this.totalLeftTimeMins < 10 || this.alerte10minsDone) {
+      if (this.alerteWorkDone === false && leftTime <= 0) {
         this.donneAlerteWorkDone();
       }
     }

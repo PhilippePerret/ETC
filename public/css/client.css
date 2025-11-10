@@ -52,6 +52,9 @@ sup {
   cursor: help;
 }
 
+.vbottom {vertical-align: bottom;}
+.vtop {vertical-align: top;}
+
 span[onclick] {
   color: darkblue;
   cursor: pointer;
@@ -397,4 +400,37 @@ table.inactifs {
 }
 table.tempo-report.actifs tr.header td span {
   cursor: nwse-resize;
+}
+
+div.help-found-container {
+  border-bottom:1px solid;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+}
+
+div.help-found-container div.found-title {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+div.help-found-container div.found-extraits {
+  font-size: 0.9em;
+  margin-left: 2em;
+}
+
+div.help-found-container div.found-extrait {
+  margin-bottom: 1.5em;
+}
+
+.found {
+  color: red;
+}
+button.found-show-whole {
+  float:left;
+  margin-right: 1em;
+}
+body.dark button.found-show-whole {
+  color: #a0a0e6!important;
+}
+body.light button.found-show-whole {
+  color: #a0a0e6!important;
 }

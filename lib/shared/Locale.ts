@@ -77,6 +77,10 @@ class Locale {
     return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
   }
 
+  public getKeys(key: string): string[] {
+    return Object.keys(this.locales[key]);
+  }
+
   /**
    * @api
    * 

@@ -15,6 +15,7 @@ ui:
     close: Close
     close_anyway: Close anyway
     dont_save_time_and_report: Don’t save Time and Report
+    find: Find
     finish: Finish
     giveUp: Abandon
     not_anymore: Not anymore

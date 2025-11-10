@@ -3244,6 +3244,9 @@ class Locale {
   translateText(texte) {
     return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
   }
+  getKeys(key) {
+    return Object.keys(this.locales[key]);
+  }
   translate(route, strict = false) {
     const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
     if (typeof translated === "string") {
@@ -23246,11 +23249,10 @@ class Clock {
       this.cycleTimeField.innerHTML = this.time2horloge(elapsedMinutes);
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
-    console.log("leftTime = %i", leftTime);
-    if (this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
+    if (this.totalLeftTimeMins >= 10 && leftTime < 10 && this.alerte10minsDone === false) {
       this.donneAlerte10mins();
-    } else if (this.alerte10minsDone) {
-      if (this.alerteWorkDone === false && leftTime < 0) {
+    } else if (this.totalLeftTimeMins < 10 || this.alerte10minsDone) {
+      if (this.alerteWorkDone === false && leftTime <= 0) {
         this.donneAlerteWorkDone();
       }
     }
@@ -23672,6 +23674,7 @@ init_flash();
 // lib/client/help.ts
 init_Locale();
 init_utils();
+init_flash();
 var HELP_TEXTS = {
   resume_home_page: `
 # t(help.introduction.title)
@@ -23731,7 +23734,7 @@ t(help.cron.text)
 
 class Help {
   constructor() {}
-  static getInst() {
+  static singleton() {
     return this.inst || (this.inst = new Help);
   }
   static inst;
@@ -23835,10 +23838,85 @@ class Help {
   init() {
     DGet("button.btn-close-help").addEventListener("click", this.close.bind(this));
     listenBtn("help-toggle", this.show.bind(this, ["resume_home_page"]));
+    listenBtn("help-search", this.searchHelp.bind(this), this.obj);
     return true;
   }
+  searchHelp(ev) {
+    Flash.notice("Je dois apprendre à chercher dans l'aide");
+    let searched = DGet("input#help-search-field", this.obj).value;
+    const keys2 = loc.getKeys("help");
+    const locales = loc.getLocales();
+    console.log("Keys", keys2);
+    const founds = {};
+    keys2.forEach((key2) => {
+      if (typeof locales.help[key2] === "object" && locales.help[key2].title) {
+        const title = t(`help.${key2}.title`);
+        const text7 = t(`help.${key2}.text`);
+        const textLength = text7.length;
+        Object.assign(founds, { [key2]: {
+          title,
+          text: text7,
+          extraits: [],
+          helpId: key2
+        } });
+        if (title.indexOf(searched) > -1) {
+          founds[key2].extraits.push(title);
+        }
+        const marge = 200;
+        let offset = -marge;
+        while (offset = text7.indexOf(searched, offset + marge - 5)) {
+          if (offset < 0) {
+            break;
+          }
+          const prefix = offset - 200 > 0 ? "[…] " : "";
+          const suffix = offset + 200 > textLength ? "" : " […]";
+          founds[key2].extraits.push(prefix + text7.substring(offset - 200, offset + 200) + suffix);
+        }
+      }
+    });
+    this.content.innerHTML = "";
+    for (var [helpId, dataHelp] of Object.entries(founds)) {
+      const extraits = dataHelp.extraits;
+      const title = dataHelp.title;
+      if (extraits.length) {
+        console.log("Trouvé dans Titre:", title);
+        console.log("Extraits", extraits);
+        const o = document.createElement("DIV");
+        o.id = `help-${helpId}`;
+        this.content.appendChild(o);
+        o.className = "help-found-container";
+        const t2 = document.createElement("DIV");
+        o.appendChild(t2);
+        t2.className = "found-title";
+        const l = document.createElement("button");
+        l.className = "found-show-whole no-btn tiny";
+        l.innerHTML = "tout afficher";
+        t2.appendChild(l);
+        l.addEventListener("click", this.replaceWithWholeHelp.bind(this, helpId));
+        const s = document.createElement("span");
+        s.innerHTML = title;
+        t2.appendChild(s);
+        const fds = document.createElement("DIV");
+        o.appendChild(fds);
+        fds.className = "found-extraits";
+        extraits.forEach((extrait) => {
+          const regexp = new RegExp(searched, "g");
+          extrait = extrait.replace(regexp, `<span class="found">${searched}</span>`);
+          const f = document.createElement("DIV");
+          f.className = "found-extrait";
+          f.innerHTML = extrait;
+          fds.appendChild(f);
+        });
+      }
+    }
+  }
+  replaceWithWholeHelp(helpId, ev) {
+    const div = DGet(`div#help-${helpId} div.found-extraits`);
+    div.innerHTML = t(`help.${helpId}.text`);
+    ev.target.remove();
+  }
 }
-var help = Help.getInst();
+var help = Help.singleton();
 window.help = help;
 
 // lib/shared/types.ts

@@ -15,6 +15,7 @@ ui:
     close: Fermer
     close_anyway: Fermer malgré tout
     dont_save_time_and_report: Ne sauver ni temps ni rapport
+    find: Chercher
     finish: Finir
     giveUp: Renoncer
     not_anymore: Non
