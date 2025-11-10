@@ -16782,7 +16782,12 @@ class Clock {
   }
   _totresttime;
   defSessionLeftTime() {
-    return this.currentWork.sessionTime || this.currentWork.leftTime;
+    console.log("[Clock.defSessionLeftTime] sessionTime:", this.currentWork.sessionTime, "leftTime", this.currentWork.leftTime);
+    if (this.currentWork.sessionTime) {
+      return Math.min(this.currentWork.sessionTime, this.currentWork.leftTime);
+    } else {
+      return this.currentWork.leftTime;
+    }
   }
   calcTotalRecTime() {
     this.totalTime = this.timeSegments.filter((segTime) => !!segTime.laps).reduce((accu, segTime) => accu + segTime.laps, 0);

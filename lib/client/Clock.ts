@@ -118,7 +118,12 @@ class Clock { /* singleton clock */
   }; 
   private _totresttime!: number;
   private defSessionLeftTime(): number {
-    return this.currentWork.sessionTime || this.currentWork.leftTime
+    console.log("[Clock.defSessionLeftTime] sessionTime:", this.currentWork.sessionTime, 'leftTime', this.currentWork.leftTime);
+    if ( this.currentWork.sessionTime ) {
+      return Math.min(this.currentWork.sessionTime as number, this.currentWork.leftTime);
+    } else {
+      return this.currentWork.leftTime;
+    }
   }
 
   /**
