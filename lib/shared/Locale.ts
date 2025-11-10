@@ -26,16 +26,28 @@ console.log('LOCALES_FOLDER =', LOCALES_FOLDER);
  * 
  */
 export function t(route: string, params?: string[]): string {
+  const rawRes = t_strict(route, params);
+  if ( rawRes ) { 
+    return rawRes 
+  } else { 
+    return `[LOC: ${route}]` 
+  }
+}
+
+// Comme @t, mais retourne undefined si l'aide n'existe pas
+// (permet donc de tester l'existence)
+export function t_strict(route: string, params?: string[]): string | undefined {
   // console.log("route = '%s'", route, params);
-  if (params) {
-    let template = loc.translate(route);
+  const rawString = loc.translate(route, true);
+  if (params && rawString) {
+    let template = rawString
     for(var i in params){
       const regexp = new RegExp(`_${i}_`, 'g');
       template = template.replace(regexp, params[i] as string);
     }
     return template;
   } else {
-    return loc.translate(route);
+    return rawString;
   }
 }
 export function tf(fpath: string) {
@@ -70,7 +82,7 @@ class Locale {
    * 
    * Reçoit une route et retourne la valeur locale.
    */
-  public translate(route: string): string {
+  public translate(route: string, strict: boolean = false): string | undefined {
     const translated = route.split('.').reduce((obj, key) => obj?.[key], this.locales) ;
     if ('string' === typeof translated) {
       this._loading_confirmed = true;
@@ -83,7 +95,8 @@ class Locale {
       // signalant l'erreur.
       if (this._loading_confirmed){
         // Vraiment une locale qui n'existe pas
-        return `[LOC: ${route}]`;
+        if (strict) { return }
+        else { return `[LOC: ${route}]` }
       } else {
         // Fatale Error
         const side = typeof window === 'undefined' ? 'server' : 'client';
@@ -97,7 +110,7 @@ class Locale {
 
   private replacementMethod(tout: string, route:string): string {
     // console.log("Traduction de %s = ", route, this.translate(route));
-    return this.translate(route);
+    return this.translate(route, false) as string;
   }
 
   /**

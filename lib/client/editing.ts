@@ -403,6 +403,10 @@ class Editing {
     // Les boutons d'aide
     const btnHelpCron = DGet('sup.to-help-cron', owork);
     help.listenOn(btnHelpCron, 'cron');
+    const btnHelpSessTime = DGet('sup.to-help-session_time', owork);
+    help.listenOn(btnHelpSessTime, ['durees', 'session_time', 'duree_cycle_vs_duree_sess']);
+    const btnHelpCycTime = DGet('sup.to-help-cycle_time', owork);
+    help.listenOn(btnHelpCycTime, ['durees', 'cycle_time', 'duree_cycle_vs_duree_sess']);
   }
 
 

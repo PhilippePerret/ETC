@@ -55,14 +55,17 @@ ui:
     Countdown: Compte à rebours
     Cron: Cron
     Cycle: Cycle
+    Cycle_dim: Cyc.
     Duration: Durée
     Folder: Dossier
     guil_close: ' »'
     guil_open: '« '
     minute: minute
     minutes: minutes
+    mns: mns
     Script: Script
     Script_button_name: Nom bouton
+    Session_dim: Sess.
     Theme: Thème
     Work: Travail
   adj:
@@ -82,6 +85,8 @@ ui:
     baton_relais: Bâton de relais
     confirmation_suppression_work: "Confirmez-vous la destruction du travail/projet « _0_ » ?"
     click_on_this_to_help_cron: "Pour définir le « cron » du travail. Cliquer sur ce point d'interrogation pour rejoindre l'aide."
+    click_on_this_to_help_cycle_time: "Pour définir la durée de cycle. Cliquer sur ce point d'interrogation pour rejoindre l'aide."
+    1click_on_this_to_help_session_time: "Pour définir la durée de session. Cliquer sur ce point d'interrogation pour rejoindre l'aide."
     counter_mode: Mode de compteur
     cycle: Cycle
     default_duration: Durée par défaut

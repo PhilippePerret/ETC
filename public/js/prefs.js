@@ -3138,15 +3138,24 @@ var init_js_yaml = __esm(() => {
 // lib/shared/Locale.ts
 var {readFileSync} = (() => ({}));
 function t(route, params) {
-  if (params) {
-    let template = loc.translate(route);
+  const rawRes = t_strict(route, params);
+  if (rawRes) {
+    return rawRes;
+  } else {
+    return `[LOC: ${route}]`;
+  }
+}
+function t_strict(route, params) {
+  const rawString = loc.translate(route, true);
+  if (params && rawString) {
+    let template = rawString;
     for (var i2 in params) {
       const regexp = new RegExp(`_${i2}_`, "g");
       template = template.replace(regexp, params[i2]);
     }
     return template;
   } else {
-    return loc.translate(route);
+    return rawString;
   }
 }
 
@@ -3158,14 +3167,18 @@ class Locale {
   translateText(texte) {
     return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
   }
-  translate(route) {
+  translate(route, strict = false) {
     const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
     if (typeof translated === "string") {
       this._loading_confirmed = true;
       return translated;
     } else {
       if (this._loading_confirmed) {
-        return `[LOC: ${route}]`;
+        if (strict) {
+          return;
+        } else {
+          return `[LOC: ${route}]`;
+        }
       } else {
         const side = typeof window === "undefined" ? "server" : "client";
         throw new Error(`Locales should be loaded (${side} side)`);
@@ -3174,7 +3187,7 @@ class Locale {
   }
   _loading_confirmed = false;
   replacementMethod(tout, route) {
-    return this.translate(route);
+    return this.translate(route, false);
   }
   async init(lang) {
     if (typeof window === "undefined") {

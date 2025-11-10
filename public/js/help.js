@@ -3117,15 +3117,24 @@ var init_js_yaml = __esm(() => {
 // lib/shared/Locale.ts
 var {readFileSync} = (() => ({}));
 function t(route, params) {
-  if (params) {
-    let template = loc.translate(route);
+  const rawRes = t_strict(route, params);
+  if (rawRes) {
+    return rawRes;
+  } else {
+    return `[LOC: ${route}]`;
+  }
+}
+function t_strict(route, params) {
+  const rawString = loc.translate(route, true);
+  if (params && rawString) {
+    let template = rawString;
     for (var i2 in params) {
       const regexp = new RegExp(`_${i2}_`, "g");
       template = template.replace(regexp, params[i2]);
     }
     return template;
   } else {
-    return loc.translate(route);
+    return rawString;
   }
 }
 function tt(text) {
@@ -3140,14 +3149,18 @@ class Locale {
   translateText(texte) {
     return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
   }
-  translate(route) {
+  translate(route, strict = false) {
     const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
     if (typeof translated === "string") {
       this._loading_confirmed = true;
       return translated;
     } else {
       if (this._loading_confirmed) {
-        return `[LOC: ${route}]`;
+        if (strict) {
+          return;
+        } else {
+          return `[LOC: ${route}]`;
+        }
       } else {
         const side = typeof window === "undefined" ? "server" : "client";
         throw new Error(`Locales should be loaded (${side} side)`);
@@ -3156,7 +3169,7 @@ class Locale {
   }
   _loading_confirmed = false;
   replacementMethod(tout, route) {
-    return this.translate(route);
+    return this.translate(route, false);
   }
   async init(lang) {
     if (typeof window === "undefined") {
@@ -16940,8 +16953,26 @@ class Help {
   listenOn(e, helpIds) {
     helpIds = typeof helpIds === "string" ? [helpIds] : helpIds;
     e.addEventListener("click", help.show.bind(help, helpIds));
+    e.classList.add("help-link");
+  }
+  getTextOf(locId) {
+    var tx;
+    if (tx = HELP_TEXTS[locId]) {
+      return tx;
+    } else if (tx = t_strict(`${locId}`)) {
+      return tx;
+    } else if (tx = t_strict(`help.${locId}.title`)) {
+      return `
+      ${t_strict(`help.${locId}.level`)} ${t(`help.${locId}.title`)}
+
+      ${t_strict(`help.${locId}.text`)}
+      `.replace(/^\s+/gm, "").trim();
+    } else {
+      return t(locId);
+    }
   }
   async show(helpIds) {
+    console.log("-> Help.show", helpIds);
     this.isOpened() || ui.toggleHelp();
     this.content.innerHTML = "";
     const LocIds = [];
@@ -16951,9 +16982,10 @@ class Help {
     this.texts = [];
     let locDef;
     while (locDef = LocIds.shift()) {
+      console.log("locDef = ", locDef);
       const locId = locDef.locId;
       const locIdpur = locId.replace(/\./g, "");
-      let texte = HELP_TEXTS[locId] || t(locId);
+      let texte = this.getTextOf(locId);
       while (texte.match(/\bt\(/)) {
         texte = tt(texte);
       }

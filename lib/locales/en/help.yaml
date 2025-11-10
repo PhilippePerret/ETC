@@ -20,6 +20,69 @@ help:
       Otherwise, it will appear normally in your work cycle and will 
       not be triggered specifically.
 
+  durees:
+    title: Durations
+    level: '##'
+    text: ''
+    
+  defaut_duration:
+    title: Default Duration
+    level: '###'
+    text: |
+      The *default duration* defines how long a task runs
+      during a full [[cycle]]. This runtime is applied
+      to any new task, but it can be adjusted.
+
+      It is set in the application preferences (⚙️).
+
+  cycle_time:
+    title: Cycle Duration
+    level: '###'
+    text: |
+      The *cycle duration* is the exact time a task must run
+      before one of its [[cycles]] is considered complete.
+
+      If this duration is not set, the [[default duration|defaut_duration]]
+      is used.
+
+  session_time:
+    title: Session Duration
+    level: '###'
+    text: |
+      The *session duration* is an optional value that can define
+      how long a task should be worked on during a work session
+      (not a cycle, but an actual work session). This allows
+      for longer [[cycle durations|cycle_time]] while keeping
+      reasonable work times per session.
+
+      The session duration is set in the task form,
+      under “Task Editing” (✍🏽).
+
+  cyctime_versus_sestime:
+    title: Cycle Duration versus Session Duration
+    level: '###'
+    text: |
+      A concrete example often speaks louder than words,
+      so let's illustrate the sometimes unclear difference
+      between *cycle duration* and *session duration*.
+
+      Imagine a 100-hour task with a cycle duration set to 4 hours.
+      This means each cycle of this task ends after 4 hours of work.
+      Then, all other current tasks must complete their cycles
+      before a new 4-hour cycle begins. This repeats until the task
+      is finished.
+
+      But maybe we don't want to work 4 hours per work session
+      (i.e., per workday). We then set the *session duration* to
+      the amount of time we want to work—say, 1 hour 30 minutes.
+      In that case, during the first session, ETC will schedule
+      1 hour 30 minutes of work even though the cycle duration
+      is 4 hours. At the next session (for instance, the next day),
+      it will again schedule 1 hour 30 minutes. Finally, since
+      only 1 hour remains (4 h − 1 h 30 × 2 = 1 h),
+      ETC will schedule a 1-hour session, completing the task cycle.
+
+
   show: Show help
   times:
     duree_cycle: Execution time for one work cycle.

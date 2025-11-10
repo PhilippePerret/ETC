@@ -1,5 +1,6 @@
 ---
 help:
+
   cron:
     title: Crontab
     level: '##'
@@ -25,8 +26,73 @@ help:
       mode inactif. Sinon, il appararaitra normalement dans votre
       cycle de travail et ne sera pas spécialement déclenché…
 
+  durees:
+    title: Les Durées
+    level: '##'
+    text: ''
+    
+  defaut_duration:
+    title: Durée par défaut
+    level: '###'
+    text: |
+      La *durée par défaut* définit la durée d'exécution d'un travail
+      pendant un [[cycle]] entier. Cette durée d'exécution est appliquée
+      à tout nouveau travail. Mais elle peut être rectifiée.
+
+      Elle se définit dans les préférences (⚙️) de l'application.
+
+  cycle_time:
+    title: Durée de cycle
+    level: '###'
+    text: |
+      La *durée de cycle* est la durée exacte que le travail devra être
+      exécuté avant de considérer qu'un de ses [[cycle]] a été accompli.
+
+      Si cette durée n'est pas définie, c'est la [[durée par défaut|defaut_duration]] 
+      qui est utilisée.
+
+  session_time:
+    title: Durée de session
+    level: '###'
+    text: |
+      La *durée de session* est une durée optionnelle qui peut définir
+      combien de temps le travail doit être exécuté au cours d'une session
+      de travail (pas d'un cycle, bien d'une session de travail). Cela 
+      permet d'avoir des [[durées de cycle|cycle_time]] longues et pourtant
+      des temps de travail raisonnables au cours de chaque session.
+
+      La durée de session se définit dans le formulaire du travail, dans
+      la partie « Édition des travaux » (✍🏽).
+
+  cyctime_versus_sestime:
+    title: Durée de cycle versus durée de session
+    level: '###'
+    text: |
+      Un exemple valant souvent mieux qu'un long discours, prenons un
+      exemple concret pour expliquer la différence pas toujours très 
+      claire entre *durée de cycle* et *durée de session*.
+
+      Imaginons, un travail de 100 heures dont la durée de cycle a été
+      réglée à 4 heures. Cela signifie que le cycle de ce travail sera
+      terminé au bout de 4 heures d'exécution. Il faudra alors attendre
+      que tous les autres travaux courants aient terminé leur cycle pour
+      amorcer un nouveau cycle de 4 heures. Jusqu'à achèvement du travail.
+
+      Mais il se peut que nous n'ayons pas envie de travailler chaque 
+      fois, à chaque session de travail (aka chaque jour de travail) pendant
+      4 heures. Nous réglons alors la valeur de la *durée de session* au 
+      temps que nous voulons travailler. Disons, pour l'exemple, que nous
+      le réglons à 1 heure 30. Cette fois, à la première session, ETC nous
+      fera travailler 1 heure 30 même si la durée de cycle est de 4 heures.
+      À la session de travail suivante (le lendemain par exemple), elle nous
+      fera à nouveau travailler 1 heure 30. Et enfin, la session suivante,
+      puisqu'il ne restera qu'une heure de travail (4 h - 1 h 30 * 2 = 1 h),
+      ETC nous fera faire une session d'une heure et le cycle du travail
+      sera alors terminé.
+
   show: Afficher l’aide
   times:
+
     duree_cycle: Durée d’exécution pour un cycle de travail.
     duree_left: Durée d’exécution restant à accomplir sur le travail dans le cycle courant.
     duree_totale: Durée d’exécution totale (tous les cycles) effectuée sur le travail.

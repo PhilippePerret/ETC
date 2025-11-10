@@ -1,3 +1,8 @@
+### 09/11/2025
+
+* Corrections de bugs
+* Possibilité d'ajouter du temps au travail courant
+
 ### 07/11/2025
 
 * Boutons fermer tous à gauche

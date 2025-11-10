@@ -1,7 +1,7 @@
 import type { RecType } from "../shared/types";
 import { DGet } from "../../public/js/dom";
 import { ui } from "./ui";
-import { tt, t } from "../shared/Locale";
+import { tt, t, t_strict } from "../shared/Locale";
 import { markdown } from "../shared/utils_shared";
 import { listenBtn } from "./utils";
 
@@ -102,9 +102,38 @@ class Help { /* singleton help */
   public listenOn(e: HTMLElement, helpIds: string | string[]){
     helpIds = 'string' === typeof helpIds ? [helpIds] : helpIds;
     e.addEventListener('click', help.show.bind(help, helpIds));
+    e.classList.add('help-link');
+  }
+
+  /**
+   * Retourne le texte d'aide d'identifiant +locId+
+   * 
+   * De façon naturelle, cet identifiant se trouve défini ci-dessus dans
+   * HELP_TEXTS. Mais il se peut qu'on mette directement l'identifiant
+   * défini dans help.yaml, dans la section help. Cette méthode se charge
+   * alors de construire la bonne valeur. Sinon, on retourne un la simple
+   * traduction du mot, ou l'identifiant lui-même, sous forme d'erreur.
+   * 
+   * @param locId Identifiant de l'aide
+   */
+  private getTextOf(locId: string): string {
+    var tx: string | undefined;
+    if (tx = HELP_TEXTS[locId]) { return tx } 
+    else if ( tx = t_strict(`${locId}`)) { return tx }
+    else if ( tx = t_strict(`help.${locId}.title`)) { 
+      // Un texte d'aide localisé
+      return `
+      ${t_strict(`help.${locId}.level`)} ${t(`help.${locId}.title`)}
+
+      ${t_strict(`help.${locId}.text`)}
+      `.replace(/^\s+/gm, '').trim();
+    }
+    else { return t(locId);}
   }
 
   public async show(helpIds: string[]){
+    console.log("-> Help.show", helpIds);
+    // console.log("HELP_TEXTS = ", HELP_TEXTS);
     this.isOpened() || ui.toggleHelp();
     this.content.innerHTML = '';
     // La liste helpIds va pouvoir être augmentée de
@@ -118,14 +147,15 @@ class Help { /* singleton help */
     this.texts = [];
     let locDef: {type: string, locId: string, prefix?: string} | undefined; 
     while((locDef = LocIds.shift())) {
-      // console.log("locDef = ", locDef);
+      console.log("locDef = ", locDef);
       const locId = locDef.locId;
       const locIdpur = locId.replace(/\./g, '');
-      let texte = HELP_TEXTS[locId] || t(locId);
+      let texte = this.getTextOf(locId);
       // console.log("TEXTE INI", texte);
       while(texte.match(/\bt\(/)) { texte = tt(texte) }
       // Est-ce un lien vers une autre partie de
-      // l'aide ?
+      // l'aide ? (dans lequel cas il faut ajouter cette aide
+      // au texte)
       if (texte.match(/help\((.+?)\)/)) {
         texte = texte.replace(/help\((.+?)\)/g, (_tout: string, hid: string) => {
           hid = hid.trim();

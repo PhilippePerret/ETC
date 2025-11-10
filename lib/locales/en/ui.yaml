@@ -55,14 +55,17 @@ ui:
     Countdown: Countdown
     Cron: Cron
     Cycle: Cycle
+    Cycle_dim: Cyc.
     Duration: Duration
     Folder: Folder
     guil_close: '"'
     guil_open: '"'
     minute: minute
     minutes: minutes
+    mns: mns
     Script: Script
     Script_button_name: Button Name
+    Session_dim: Sess.
     Theme: Theme
     Work: Work
   adj:
@@ -81,6 +84,8 @@ ui:
     are_you_still_working: "Are you still working on this work?"
     baton_relais: Relay baton
     click_on_this_to_help_cron: "To define the job's “cron”. Click this question mark to open the help section."
+    click_on_this_to_help_cycle_time: "To define Cycle time. Click this question mark to open the help section."
+    click_on_this_to_help_session_time: "To define Session time. Click this question mark to open the help section."
     confirmation_suppression_work: 'Do you confirm the deletion of the work/project "_0_"?'
     counter_mode: Counter Mode
     cycle: Cycle
