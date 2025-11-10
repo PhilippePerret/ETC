@@ -2,6 +2,7 @@ import { DGet } from "../../public/js/dom";
 import { ui } from "./ui";
 import { Work } from "./work";
 import { Flash } from "../../public/js/flash";
+import { t } from '../shared/Locale';
 
 interface TimeSegment {
   beg: number;
@@ -102,7 +103,7 @@ class Clock { /* singleton clock */
     if (this.counterMode === 'clock') {
       return '0:00:00';
     } else {
-      return this.s2h(this.totalRestTimeSeconds);
+      return this.s2h(this.totalLeftTimeSeconds);
     }
   }
 
@@ -113,10 +114,14 @@ class Clock { /* singleton clock */
    * sert même pas pour faire la différence entre le session time et le
    * cycleTime)
    */
-  private get totalRestTimeSeconds(){
-    return this._totresttime || (this._totresttime = this.defSessionLeftTime() * 60)
+  private get totalLeftTimeMins(){
+    return this._totleftmmns || (this._totleftmmns = Math.round(this.totalLeftTimeSeconds / 60))
+  }
+  private get totalLeftTimeSeconds(){
+    return this._totlefttime || (this._totlefttime = this.defSessionLeftTime() * 60)
   }; 
-  private _totresttime!: number;
+  private _totlefttime!: number;
+  private _totleftmmns!: number;
   private defSessionLeftTime(): number {
     console.log("[Clock.defSessionLeftTime] sessionTime:", this.currentWork.sessionTime, 'leftTime', this.currentWork.leftTime);
     if ( this.currentWork.sessionTime ) {
@@ -197,29 +202,40 @@ class Clock { /* singleton clock */
     return this.totalTime;
   }
 
+  /**
+   * Fonction appelée récursivement toutes les demi-secondes
+   */
   private run(){
     const secondesOfWork: number = this.totalTime + this.lapsFromStart();
     // console.log("totalTime: %i | fromStart: %i", this.totalTime, this.lapsFromStart());
     let displayedSeconds: number;
     if (this.counterMode === 'clock') { displayedSeconds = secondesOfWork}
-    else /* countdown */ { displayedSeconds = this.totalRestTimeSeconds - secondesOfWork}
-    const leftTime = this.workRestTime(secondesOfWork);
+    else /* countdown */ { displayedSeconds = this.totalLeftTimeSeconds - secondesOfWork}
     /****************************************
      * AFFICHAGE DU TEMPS DANS L'INTERFACE  *
      ****************************************/
     // L'horloge principale
-    const curhorl = this.s2h(displayedSeconds || 0); // '|| 0' fix \#190
+    let curhorl: string;
+    if ( displayedSeconds < 0 ) {
+      // Petite animation…
+      curhorl = (displayedSeconds % 2 === 0 ? '+':'-') + this.s2h(-displayedSeconds);
+    } else {
+      curhorl = this.s2h(displayedSeconds);
+    }
     if (ui.currentSection === 'work'){
       this.clockObj.innerHTML = curhorl;
     } else {
       ui.setTitle(`ETC — ${curhorl}`);
     }
+
+    const leftTime: number = this.workLeftTimeMinutes(secondesOfWork);
+
     // Les temps du travail (seulement si la "minute" a changé)
     if (secondesOfWork % 60 === 0) {
       const thisMinute = Math.round(secondesOfWork / 60);
       const elapsedMinutes = this.currentWork.cycleTime + thisMinute;
       const totalMinutes = this.currentWork.totalTime + thisMinute;
-      this.restTimeField.innerHTML  = this.time2horloge(leftTime);
+      this.leftTimeField.innerHTML  = this.time2horloge(leftTime);
       this.cycleTimeField.innerHTML = this.time2horloge(elapsedMinutes);
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
@@ -228,8 +244,8 @@ class Clock { /* singleton clock */
     /*****************************************************
      * ALERTE SI LE TEMPS DE FIN APPROCHE OU EST ARRIVÉ  *
      *****************************************************/
-    // console.log("leftTime = %i", leftTime);
-    if ( leftTime < 10 && this.alerte10minsDone === false) {
+    console.log("leftTime = %i", leftTime);
+    if ( this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
       // 10 minutes restantes sur ce travail
       this.donneAlerte10mins();
     } else if (this.alerte10minsDone) {
@@ -244,8 +260,8 @@ class Clock { /* singleton clock */
     }
   };
 
-  private get restTimeField(){
-    return this._restfield || (this._restfield = DGet('span#current-work-leftTime'))
+  private get leftTimeField(){
+    return this._leftfield || (this._leftfield = DGet('span#current-work-leftTime'))
   }
   private get cycleTimeField(){
     return this._cycledurfield || (this._cycledurfield = DGet('span#current-work-cycleTime'))
@@ -258,23 +274,26 @@ class Clock { /* singleton clock */
   private donneAlerte10mins(){
     ui.setBackgroundColorAt('orange');
     this.bringAppToFront();
-    Flash.notice("10 minutes of work remaining");
+    Flash.notice(t('clock.ten_minutes_remaining'));
     this.alerte10minsDone = true;
   }
   private donneAlerteWorkDone(){
-    ui.setBackgroundColorAt('rouge');
+    ui.setBackgroundColorAt('red');
     this.bringAppToFront();
-    Flash.notice('Work time is over. Please move on to the next work.');
+    Flash.notice(t('clock.work_time_is_over'));
     this.alerteWorkDone = true;
   }
 
   /**
    * Retourne le nombre de minutes restantes avant la fin.
    * Attention, la méthode est appelée toutes les demi-secondes.
+   * 
+   * Note : Elle tient compte du fait que le temps de travail de
+   * la session puisse être défini par sessionTime.
+   * 
    */
-  private workRestTime(minutesOfWork: number): number {
-    minutesOfWork = minutesOfWork / 60;
-    return this.currentWork.leftTime - minutesOfWork;
+  private workLeftTimeMinutes(secondsOfWork: number): number {
+    return Math.round((this.totalLeftTimeSeconds  - secondsOfWork) / 60);
   }
 
   private lapsFromStart(){
@@ -300,7 +319,7 @@ class Clock { /* singleton clock */
     (window as any).electronAPI.bringToFront();
   }
 
-  private _restfield!: HTMLSpanElement;
+  private _leftfield!: HTMLSpanElement;
   private _cycledurfield!: HTMLSpanElement;
   private _totalfield!: HTMLSpanElement;
 }

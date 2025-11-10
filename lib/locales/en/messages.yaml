@@ -25,6 +25,9 @@ error:
     undefined_project: "Project Title is required."
 
     error_found: "Errors found: _0_."
+clock:
+  ten_minutes_remaining: "10 minutes of work remaining"
+  work_time_is_over: "Work time is over. Please move on to the next work."
 files:
   unfound_at_path: "Unfound _0_ at '_1_'"
 locales:

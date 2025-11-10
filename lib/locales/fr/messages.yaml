@@ -25,6 +25,9 @@ error:
     session_time_must_be_less_than_cycle_time: "La durée session (_0_ mns) doit évidemment être inférieure à la durée cycle (_1_ mns). Consultez l'aide, au besoin."
     undefined_project: "Le titre du projet est requis."
 
+clock:
+  ten_minutes_remaining: "Il reste 10 minutes de travail pour cette session."
+  work_time_is_over: "Travail terminé. Vous pouvez passer au suivant."
 files:
   unfound_at_path: "Fichier _0_ introuvable à '_1_'"
 locales:

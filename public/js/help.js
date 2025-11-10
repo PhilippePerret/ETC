@@ -139,14 +139,6 @@ class FlashMessage {
 }
 var init_flash = () => {};
 
-// public/js/constants.js
-var PORT, HOST;
-var init_constants = __esm(() => {
-  console.log("window.location.port = ", window.location.port);
-  PORT = window.location.port;
-  HOST = `http://localhost:${PORT}`;
-});
-
 // node:path
 function assertPath(path) {
   if (typeof path !== "string")
@@ -3114,99 +3106,12 @@ var init_js_yaml = __esm(() => {
   js_yaml_default = jsYaml;
 });
 
-// lib/shared/Locale.ts
-var {readFileSync} = (() => ({}));
-function t(route, params) {
-  const rawRes = t_strict(route, params);
-  if (rawRes) {
-    return rawRes;
-  } else {
-    return `[LOC: ${route}]`;
-  }
-}
-function t_strict(route, params) {
-  const rawString = loc.translate(route, true);
-  if (params && rawString) {
-    let template = rawString;
-    for (var i2 in params) {
-      const regexp = new RegExp(`_${i2}_`, "g");
-      template = template.replace(regexp, params[i2]);
-    }
-    return template;
-  } else {
-    return rawString;
-  }
-}
-function tt(text) {
-  return loc.translateText(text);
-}
-
-class Locale {
-  BASEFILES = ["messages", "ui", "help"];
-  getLocales() {
-    return this.locales;
-  }
-  translateText(texte) {
-    return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
-  }
-  translate(route, strict = false) {
-    const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
-    if (typeof translated === "string") {
-      this._loading_confirmed = true;
-      return translated;
-    } else {
-      if (this._loading_confirmed) {
-        if (strict) {
-          return;
-        } else {
-          return `[LOC: ${route}]`;
-        }
-      } else {
-        const side = typeof window === "undefined" ? "server" : "client";
-        throw new Error(`Locales should be loaded (${side} side)`);
-      }
-    }
-  }
-  _loading_confirmed = false;
-  replacementMethod(tout, route) {
-    return this.translate(route, false);
-  }
-  async init(lang) {
-    if (typeof window === "undefined") {
-      return this.initServerSide(lang);
-    } else {
-      const { postToServer } = await Promise.resolve().then(() => (init_utils(), exports_utils));
-      const retour = await postToServer("/localization/get-all", { lang });
-      if (retour.ok) {
-        this.locales = retour.locales;
-      }
-      return retour.ok;
-    }
-  }
-  initServerSide(lang) {
-    this.locales = {};
-    const folderLang = path_default.join(LOCALES_FOLDER, lang);
-    this.BASEFILES.forEach((base) => {
-      const pathLocale = path_default.join(folderLang, `${base}.yaml`);
-      Object.assign(this.locales, js_yaml_default.load(readFileSync(pathLocale, "utf8")));
-    });
-    return true;
-  }
-  locales;
-  constructor() {}
-  static singleton() {
-    return this.inst || (this.inst = new Locale);
-  }
-  static inst;
-}
-var __dirname = "/Users/philippeperret/Programmes/ETC/lib/shared", LOCALES_FOLDER, loc;
-var init_Locale = __esm(() => {
-  init_path();
-  init_js_yaml();
-  console.log("__dirname =", __dirname);
-  LOCALES_FOLDER = typeof process !== "undefined" && process.env?.APP_PATH ? path_default.join(process.env.APP_PATH, "lib", "locales") : path_default.resolve(path_default.join(__dirname, "..", "locales"));
-  console.log("LOCALES_FOLDER =", LOCALES_FOLDER);
-  loc = Locale.singleton();
+// public/js/constants.js
+var PORT, HOST;
+var init_constants = __esm(() => {
+  console.log("window.location.port = ", window.location.port);
+  PORT = window.location.port;
+  HOST = `http://localhost:${PORT}`;
 });
 
 // lib/client/utils.ts
@@ -3274,6 +3179,101 @@ var init_utils = __esm(() => {
   init_constants();
   init_flash();
   init_Locale();
+});
+
+// lib/shared/Locale.ts
+var {readFileSync} = (() => ({}));
+function t(route, params) {
+  const rawRes = t_strict(route, params);
+  if (rawRes) {
+    return rawRes;
+  } else {
+    return `[LOC: ${route}]`;
+  }
+}
+function t_strict(route, params) {
+  const rawString = loc.translate(route, true);
+  if (params && rawString) {
+    let template = rawString;
+    for (var i2 in params) {
+      const regexp = new RegExp(`_${i2}_`, "g");
+      template = template.replace(regexp, params[i2]);
+    }
+    return template;
+  } else {
+    return rawString;
+  }
+}
+function tt(text) {
+  return loc.translateText(text);
+}
+
+class Locale {
+  BASEFILES = ["messages", "ui", "help"];
+  getLocales() {
+    return this.locales;
+  }
+  translateText(texte) {
+    return texte.replace(/\bt\((.+?)\)/g, this.replacementMethod.bind(this));
+  }
+  translate(route, strict = false) {
+    const translated = route.split(".").reduce((obj, key) => obj?.[key], this.locales);
+    if (typeof translated === "string") {
+      this._loading_confirmed = true;
+      return translated;
+    } else {
+      if (this._loading_confirmed) {
+        if (strict) {
+          return;
+        } else {
+          return `[LOC: ${route}]`;
+        }
+      } else {
+        const side = typeof window === "undefined" ? "server" : "client";
+        throw new Error(`Locales should be loaded (${side} side)`);
+      }
+    }
+  }
+  _loading_confirmed = false;
+  replacementMethod(tout, route) {
+    return this.translate(route, false);
+  }
+  async init(lang) {
+    if (typeof window === "undefined") {
+      return this.initServerSide(lang);
+    } else {
+      const { postToServer: postToServer2 } = await Promise.resolve().then(() => (init_utils(), exports_utils));
+      const retour = await postToServer2("/localization/get-all", { lang });
+      if (retour.ok) {
+        this.locales = retour.locales;
+      }
+      return retour.ok;
+    }
+  }
+  initServerSide(lang) {
+    this.locales = {};
+    const folderLang = path_default.join(LOCALES_FOLDER, lang);
+    this.BASEFILES.forEach((base) => {
+      const pathLocale = path_default.join(folderLang, `${base}.yaml`);
+      Object.assign(this.locales, js_yaml_default.load(readFileSync(pathLocale, "utf8")));
+    });
+    return true;
+  }
+  locales;
+  constructor() {}
+  static singleton() {
+    return this.inst || (this.inst = new Locale);
+  }
+  static inst;
+}
+var __dirname = "/Users/philippeperret/Programmes/ETC/lib/shared", LOCALES_FOLDER, loc;
+var init_Locale = __esm(() => {
+  init_path();
+  init_js_yaml();
+  console.log("__dirname =", __dirname);
+  LOCALES_FOLDER = typeof process !== "undefined" && process.env?.APP_PATH ? path_default.join(process.env.APP_PATH, "lib", "locales") : path_default.resolve(path_default.join(__dirname, "..", "locales"));
+  console.log("LOCALES_FOLDER =", LOCALES_FOLDER);
+  loc = Locale.singleton();
 });
 
 // node_modules/extend/index.js
@@ -3809,6 +3809,7 @@ var require_browser = __commonJS((exports, module) => {
 });
 // lib/client/Clock.ts
 init_flash();
+init_Locale();
 
 class Clock {
   static singleton() {
@@ -3875,13 +3876,17 @@ class Clock {
     if (this.counterMode === "clock") {
       return "0:00:00";
     } else {
-      return this.s2h(this.totalRestTimeSeconds);
+      return this.s2h(this.totalLeftTimeSeconds);
     }
   }
-  get totalRestTimeSeconds() {
-    return this._totresttime || (this._totresttime = this.defSessionLeftTime() * 60);
+  get totalLeftTimeMins() {
+    return this._totleftmmns || (this._totleftmmns = Math.round(this.totalLeftTimeSeconds / 60));
   }
-  _totresttime;
+  get totalLeftTimeSeconds() {
+    return this._totlefttime || (this._totlefttime = this.defSessionLeftTime() * 60);
+  }
+  _totlefttime;
+  _totleftmmns;
   defSessionLeftTime() {
     console.log("[Clock.defSessionLeftTime] sessionTime:", this.currentWork.sessionTime, "leftTime", this.currentWork.leftTime);
     if (this.currentWork.sessionTime) {
@@ -3938,24 +3943,30 @@ class Clock {
     if (this.counterMode === "clock") {
       displayedSeconds = secondesOfWork;
     } else {
-      displayedSeconds = this.totalRestTimeSeconds - secondesOfWork;
+      displayedSeconds = this.totalLeftTimeSeconds - secondesOfWork;
     }
-    const leftTime = this.workRestTime(secondesOfWork);
-    const curhorl = this.s2h(displayedSeconds || 0);
+    let curhorl;
+    if (displayedSeconds < 0) {
+      curhorl = (displayedSeconds % 2 === 0 ? "+" : "-") + this.s2h(-displayedSeconds);
+    } else {
+      curhorl = this.s2h(displayedSeconds);
+    }
     if (ui.currentSection === "work") {
       this.clockObj.innerHTML = curhorl;
     } else {
       ui.setTitle(`ETC — ${curhorl}`);
     }
+    const leftTime = this.workLeftTimeMinutes(secondesOfWork);
     if (secondesOfWork % 60 === 0) {
       const thisMinute = Math.round(secondesOfWork / 60);
       const elapsedMinutes = this.currentWork.cycleTime + thisMinute;
       const totalMinutes = this.currentWork.totalTime + thisMinute;
-      this.restTimeField.innerHTML = this.time2horloge(leftTime);
+      this.leftTimeField.innerHTML = this.time2horloge(leftTime);
       this.cycleTimeField.innerHTML = this.time2horloge(elapsedMinutes);
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
-    if (leftTime < 10 && this.alerte10minsDone === false) {
+    console.log("leftTime = %i", leftTime);
+    if (this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
       this.donneAlerte10mins();
     } else if (this.alerte10minsDone) {
       if (this.alerteWorkDone === false && leftTime < 0) {
@@ -3963,8 +3974,8 @@ class Clock {
       }
     }
   }
-  get restTimeField() {
-    return this._restfield || (this._restfield = DGet("span#current-work-leftTime"));
+  get leftTimeField() {
+    return this._leftfield || (this._leftfield = DGet("span#current-work-leftTime"));
   }
   get cycleTimeField() {
     return this._cycledurfield || (this._cycledurfield = DGet("span#current-work-cycleTime"));
@@ -3975,18 +3986,17 @@ class Clock {
   donneAlerte10mins() {
     ui.setBackgroundColorAt("orange");
     this.bringAppToFront();
-    Flash.notice("10 minutes of work remaining");
+    Flash.notice(t("clock.ten_minutes_remaining"));
     this.alerte10minsDone = true;
   }
   donneAlerteWorkDone() {
-    ui.setBackgroundColorAt("rouge");
+    ui.setBackgroundColorAt("red");
     this.bringAppToFront();
-    Flash.notice("Work time is over. Please move on to the next work.");
+    Flash.notice(t("clock.work_time_is_over"));
     this.alerteWorkDone = true;
   }
-  workRestTime(minutesOfWork) {
-    minutesOfWork = minutesOfWork / 60;
-    return this.currentWork.leftTime - minutesOfWork;
+  workLeftTimeMinutes(secondsOfWork) {
+    return Math.round((this.totalLeftTimeSeconds - secondsOfWork) / 60);
   }
   lapsFromStart() {
     return Math.round(this.getTime() - this.startTime);
@@ -4007,7 +4017,7 @@ class Clock {
   bringAppToFront() {
     window.electronAPI.bringToFront();
   }
-  _restfield;
+  _leftfield;
   _cycledurfield;
   _totalfield;
 }

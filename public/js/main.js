@@ -23090,6 +23090,7 @@ var ui = UI.singleton();
 
 // lib/client/Clock.ts
 init_flash();
+init_Locale();
 
 class Clock {
   static singleton() {
@@ -23156,13 +23157,17 @@ class Clock {
     if (this.counterMode === "clock") {
       return "0:00:00";
     } else {
-      return this.s2h(this.totalRestTimeSeconds);
+      return this.s2h(this.totalLeftTimeSeconds);
     }
   }
-  get totalRestTimeSeconds() {
-    return this._totresttime || (this._totresttime = this.defSessionLeftTime() * 60);
+  get totalLeftTimeMins() {
+    return this._totleftmmns || (this._totleftmmns = Math.round(this.totalLeftTimeSeconds / 60));
   }
-  _totresttime;
+  get totalLeftTimeSeconds() {
+    return this._totlefttime || (this._totlefttime = this.defSessionLeftTime() * 60);
+  }
+  _totlefttime;
+  _totleftmmns;
   defSessionLeftTime() {
     console.log("[Clock.defSessionLeftTime] sessionTime:", this.currentWork.sessionTime, "leftTime", this.currentWork.leftTime);
     if (this.currentWork.sessionTime) {
@@ -23219,24 +23224,30 @@ class Clock {
     if (this.counterMode === "clock") {
       displayedSeconds = secondesOfWork;
     } else {
-      displayedSeconds = this.totalRestTimeSeconds - secondesOfWork;
+      displayedSeconds = this.totalLeftTimeSeconds - secondesOfWork;
     }
-    const leftTime = this.workRestTime(secondesOfWork);
-    const curhorl = this.s2h(displayedSeconds || 0);
+    let curhorl;
+    if (displayedSeconds < 0) {
+      curhorl = (displayedSeconds % 2 === 0 ? "+" : "-") + this.s2h(-displayedSeconds);
+    } else {
+      curhorl = this.s2h(displayedSeconds);
+    }
     if (ui.currentSection === "work") {
       this.clockObj.innerHTML = curhorl;
     } else {
       ui.setTitle(`ETC — ${curhorl}`);
     }
+    const leftTime = this.workLeftTimeMinutes(secondesOfWork);
     if (secondesOfWork % 60 === 0) {
       const thisMinute = Math.round(secondesOfWork / 60);
       const elapsedMinutes = this.currentWork.cycleTime + thisMinute;
       const totalMinutes = this.currentWork.totalTime + thisMinute;
-      this.restTimeField.innerHTML = this.time2horloge(leftTime);
+      this.leftTimeField.innerHTML = this.time2horloge(leftTime);
       this.cycleTimeField.innerHTML = this.time2horloge(elapsedMinutes);
       this.totalTimeField.innerHTML = this.time2horloge(totalMinutes);
     }
-    if (leftTime < 10 && this.alerte10minsDone === false) {
+    console.log("leftTime = %i", leftTime);
+    if (this.totalLeftTimeMins > 10 && leftTime < 10 && this.alerte10minsDone === false) {
       this.donneAlerte10mins();
     } else if (this.alerte10minsDone) {
       if (this.alerteWorkDone === false && leftTime < 0) {
@@ -23244,8 +23255,8 @@ class Clock {
       }
     }
   }
-  get restTimeField() {
-    return this._restfield || (this._restfield = DGet("span#current-work-leftTime"));
+  get leftTimeField() {
+    return this._leftfield || (this._leftfield = DGet("span#current-work-leftTime"));
   }
   get cycleTimeField() {
     return this._cycledurfield || (this._cycledurfield = DGet("span#current-work-cycleTime"));
@@ -23256,18 +23267,17 @@ class Clock {
   donneAlerte10mins() {
     ui.setBackgroundColorAt("orange");
     this.bringAppToFront();
-    Flash.notice("10 minutes of work remaining");
+    Flash.notice(t("clock.ten_minutes_remaining"));
     this.alerte10minsDone = true;
   }
   donneAlerteWorkDone() {
-    ui.setBackgroundColorAt("rouge");
+    ui.setBackgroundColorAt("red");
     this.bringAppToFront();
-    Flash.notice("Work time is over. Please move on to the next work.");
+    Flash.notice(t("clock.work_time_is_over"));
     this.alerteWorkDone = true;
   }
-  workRestTime(minutesOfWork) {
-    minutesOfWork = minutesOfWork / 60;
-    return this.currentWork.leftTime - minutesOfWork;
+  workLeftTimeMinutes(secondsOfWork) {
+    return Math.round((this.totalLeftTimeSeconds - secondsOfWork) / 60);
   }
   lapsFromStart() {
     return Math.round(this.getTime() - this.startTime);
@@ -23288,7 +23298,7 @@ class Clock {
   bringAppToFront() {
     window.electronAPI.bringToFront();
   }
-  _restfield;
+  _leftfield;
   _cycledurfield;
   _totalfield;
 }
