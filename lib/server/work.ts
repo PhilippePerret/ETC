@@ -5,7 +5,7 @@ import { prefs } from "./prefs";
 import { DEFAULT_WORK, type RecType, type WorkType } from "../shared/types";
 import { t } from '../shared/Locale';
 import { startOfToday } from "../shared/utils_shared";
-import { appendFile, existsSync, readFileSync, renameSync, unlinkSync, writeFile, writeFileSync } from "fs";
+import { appendFile, existsSync, readFileSync, renameSync, unlinkSync, writeFile } from "fs";
 
 export class Work /* server */ {
   public static defaultDuration: number;

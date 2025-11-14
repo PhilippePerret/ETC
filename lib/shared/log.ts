@@ -1,5 +1,5 @@
 import path from 'path';
-import os from 'os';
+import * as os from 'os';
 import { appendFileSync, existsSync, mkdirSync } from "fs";
 import { serverSide } from "./which_side";
 // import { format as prettyFormat } from 'pretty-format';
@@ -11,25 +11,25 @@ const PATHS = {
 class Log { /* singleton log */
 
   public info(message: string, data: any | undefined = undefined){
-    console.log(message, data)
     serverSide && this.logInFile(message, data, 'info');
   }
   
   public warn(message: string, data: any | undefined = undefined){
-    console.warn(message, data)
     serverSide && this.logInFile(message, data, 'warn');
   }
   public error(message: string, data: any | undefined = undefined){
-    console.error(message, data)
     serverSide && this.logInFile(message, data, 'error');
   }
 
   private logInFile(message: string, data: any, errorLevel: 'info' | 'warn' | 'error'){
     if (data) {
+      console[errorLevel](message, data);
       data = JSON.stringify(data);
       message += "\n" + data;
+    } else {
+      console[errorLevel](message);
     }
-    message = `${this.now()} ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`
+    message = `[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`
     appendFileSync(this.logFile, message, 'utf8'); 
   }
 
@@ -50,11 +50,10 @@ class Log { /* singleton log */
   private get logFile(){
     return this._logfile || (this._logfile = this.ensureLogFile())
   }; private _logfile!: string;
+
   private ensureLogFile(){
-    if (!existsSync(PATHS.log)){
-      mkdirSync(PATHS.log);
-    }
-    return path.join(PATHS.log, 'main.log');
+    existsSync(PATHS.log) || mkdirSync(PATHS.log);
+    return path.join(PATHS.log, 'ETC', 'main.log');
   }
 
   private constructor(){}

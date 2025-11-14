@@ -9,6 +9,7 @@ import { t } from '../shared/Locale';
 import { prefs } from './prefs';
 import log from '../shared/log';
 import { CronExpressionParser } from 'cron-parser';
+import type { Rectangle } from 'electron';
 
 class DBWorks { /* singleton db */
 
@@ -21,6 +22,8 @@ class DBWorks { /* singleton db */
    * @returns Le travail à travailler
    */
   public getTodayCandidats(conditions: string): WorkType | undefined {
+    // if (ENV === 'dev') { this.debugWorkState(conditions) }
+    this.debugWorkState(conditions); // Pour le moment, on le fait chaque fois
     const request = `
     SELECT * FROM (
       SELECT * FROM works 
@@ -28,7 +31,77 @@ class DBWorks { /* singleton db */
         ORDER BY leftTime DESC LIMIT 5
     ) ORDER BY RANDOM() LIMIT 1;
     `
-    return this.db.query(request).get() as WorkType | undefined;
+    const choisi = this.db.query(request).get() as WorkType | undefined;
+    this.logLinesOfResultat("CANDIDAT RETENU", [choisi]);
+    return choisi;
+  }
+
+
+  /**
+   * Pour débugger l'état des travaux à la relève du candidat
+   */
+  private debugWorkState(conditions: string){
+    const req1 = `
+    SELECT
+      project,
+      active, leftTime, cycleTime, sessionTime, totalTime,
+      lastWorkedAt, cron, nextCronDateAt
+    FROM 
+      works
+    ORDER BY
+      leftTime DESC
+    `
+    this.logLinesOfRequest('ÉTAT DES TRAVAUX', req1);
+
+    const req2 = `
+      SELECT * FROM works 
+        WHERE ${conditions}
+        ORDER BY leftTime DESC LIMIT 5
+    `
+    log.info("Conditions: ", conditions);
+    this.logLinesOfRequest('CINQ CANDIDATS CHOISIS', req2);
+  }
+
+  logLinesOfRequest(titre:string, request: string){
+    const resultat = this.db.query(request).all();
+    this.logLinesOfResultat(titre, resultat);
+  }
+
+  logLinesOfResultat(titre: string, resultat: any[]){
+    const titLen = 32
+    const lines: string[] = [];
+    lines.push(
+      [
+        'PROJET'.padEnd(titLen),
+        '   ',
+        'left',
+        'cyc.',
+        'ses.',
+        'total  ',
+        '    cron    '
+      ].join(' ')
+    );
+    //@ts-ignore
+    lines.push(new Array(lines[0].length + 1).join('-'));
+    resultat.forEach((line: any) => {
+      const data = [
+        line.project.padEnd(titLen).substring(0, titLen),
+        line.active ? 'on ' : 'off',
+        line.leftTime.toString(10).padEnd(4),
+        line.cycleTime.toString(10).padEnd(4),
+        (line.sessionTime||'').toString(10).padEnd(4),
+        line.totalTime.toString(10).padEnd(7),
+        (line.cron || '').toString(10).padEnd(12),
+
+      ];
+      lines.push(data.join(' '))
+    });
+    const seg = []
+    seg.push("\n")
+    seg.push(titre);
+    seg.push(new Array(titre.length + 1).join('-'));
+    seg.push(lines.join("\n"));
+    log.info(seg.join("\n"));
   }
 
 

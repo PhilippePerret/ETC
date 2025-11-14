@@ -16139,32 +16139,39 @@ init_Locale();
 
 // lib/shared/log.ts
 init_path();
+
+// node:os
+var homedir = function() {
+  return "/";
+};
+
+// lib/shared/log.ts
 init_which_side();
 var {appendFileSync, existsSync, mkdirSync} = (() => ({}));
 var PATHS = {
-  log: path_default.join("~", "Library", "Logs")
+  log: path_default.join(homedir(), "Library", "Logs")
 };
 
 class Log {
   info(message, data = undefined) {
-    console.log(message, data);
     serverSide && this.logInFile(message, data, "info");
   }
   warn(message, data = undefined) {
-    console.warn(message, data);
     serverSide && this.logInFile(message, data, "warn");
   }
   error(message, data = undefined) {
-    console.error(message, data);
     serverSide && this.logInFile(message, data, "error");
   }
   logInFile(message, data, errorLevel) {
     if (data) {
+      console[errorLevel](message, data);
       data = JSON.stringify(data);
       message += `
 ` + data;
+    } else {
+      console[errorLevel](message);
     }
-    message = `${this.now()} ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`;
+    message = `[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`;
     appendFileSync(this.logFile, message, "utf8");
   }
   now() {
@@ -16187,10 +16194,8 @@ class Log {
   }
   _logfile;
   ensureLogFile() {
-    if (!existsSync(PATHS.log)) {
-      mkdirSync(PATHS.log);
-    }
-    return path_default.join(PATHS.log, "main.log");
+    existsSync(PATHS.log) || mkdirSync(PATHS.log);
+    return path_default.join(PATHS.log, "ETC", "main.log");
   }
   constructor() {}
   static _inst;
