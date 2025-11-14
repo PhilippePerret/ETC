@@ -2,6 +2,7 @@ import type { RecType } from "./types";
 import path from 'path';
 import yaml from 'js-yaml';
 import { readFileSync } from "fs";
+import { serverSide } from "./which_side";
 
 
 // console.log('APP_PATH =', process.env.APP_PATH);
@@ -13,7 +14,7 @@ console.log('__dirname =', __dirname);
 //   ? path.join(process.env.APP_PATH, 'lib', 'locales')
 //   : path.resolve(path.join(__dirname, '..', 'locales'));
 
-const LOCALES_FOLDER = typeof process !== 'undefined' && process.env?.APP_PATH
+const LOCALES_FOLDER = serverSide && process.env?.APP_PATH
   ? path.join(process.env.APP_PATH, 'lib', 'locales')
   : path.resolve(path.join(__dirname, '..', 'locales'));
 

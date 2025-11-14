@@ -1,17 +1,61 @@
+import path from 'path';
+import os from 'os';
+import { appendFileSync, existsSync, mkdirSync } from "fs";
+import { serverSide } from "./which_side";
+// import { format as prettyFormat } from 'pretty-format';
 
+const PATHS = {
+  log: path.join(os.homedir(), 'Library', 'Logs')
+};
 
 class Log { /* singleton log */
 
   public info(message: string, data: any | undefined = undefined){
     console.log(message, data)
+    serverSide && this.logInFile(message, data, 'info');
   }
+  
   public warn(message: string, data: any | undefined = undefined){
     console.warn(message, data)
+    serverSide && this.logInFile(message, data, 'warn');
   }
   public error(message: string, data: any | undefined = undefined){
     console.error(message, data)
+    serverSide && this.logInFile(message, data, 'error');
   }
 
+  private logInFile(message: string, data: any, errorLevel: 'info' | 'warn' | 'error'){
+    if (data) {
+      data = JSON.stringify(data);
+      message += "\n" + data;
+    }
+    message = `${this.now()} ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`
+    appendFileSync(this.logFile, message, 'utf8'); 
+  }
+
+  private now(){
+    const n = new Date();
+    const year = n.getFullYear();
+    const month = (n.getMonth() + 1).toString(10).padStart(2,'0');
+    const day = n.getDate().toString(10).padStart(2,'0');
+    const hour = n.getHours().toString(10).padStart(2,'0');
+    const minute = n.getMinutes().toString(10).padStart(2,'0');
+    const second = n.getSeconds().toString(10).padStart(2,'0');
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`
+  }
+
+  PREFIXBYERRORLEVEL = {
+    info: '', error: 'ERROR: ', warn: 'WARN: '
+  }
+  private get logFile(){
+    return this._logfile || (this._logfile = this.ensureLogFile())
+  }; private _logfile!: string;
+  private ensureLogFile(){
+    if (!existsSync(PATHS.log)){
+      mkdirSync(PATHS.log);
+    }
+    return path.join(PATHS.log, 'main.log');
+  }
 
   private constructor(){}
   private static _inst: Log;

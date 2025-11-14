@@ -2,8 +2,6 @@ const { existsSync } = require('fs');
 const { app, BrowserWindow } = require('electron');
 const { spawn } = require('child_process');
 const userDataPath = app.getPath('userData');
-const log = require('electron-log/main');
-log.initialize();
 
 // const WITH_CONSOLE_DEV = true;
 const WITH_CONSOLE_DEV = false;
@@ -41,10 +39,10 @@ const HOST = `http://localhost:${PORT}`;
 
 
 const serverPath = path.join(__dirname, '..', 'lib', 'server', 'server.ts').replace('app.asar', 'app.asar.unpacked');
-log.info("serverPath:", serverPath);
+console.info("serverPath:", serverPath);
 
 const cwdPath = path.join(__dirname, '..').replace('app.asar', 'app.asar.unpacked')
-log.info("cwdPath:", cwdPath);
+console.info("cwdPath:", cwdPath);
 
 const envProps = { 
   ...process.env, 
@@ -135,8 +133,8 @@ app.whenReady().then(() => {
 
 });
 
-log.info("app.getAppPath():", app.getAppPath());
-log.info("process.resourcesPath:", process.resourcesPath);
+console.info("app.getAppPath():", app.getAppPath());
+console.info("process.resourcesPath:", process.resourcesPath);
 
 /**
  * Quand on quitte l'application (donc Electron), il faut aussi

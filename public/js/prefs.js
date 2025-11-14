@@ -3135,6 +3135,13 @@ var init_js_yaml = __esm(() => {
   js_yaml_default = jsYaml;
 });
 
+// lib/shared/which_side.ts
+var isClient, serverSide;
+var init_which_side = __esm(() => {
+  isClient = typeof process !== "undefined";
+  serverSide = isClient;
+});
+
 // lib/shared/Locale.ts
 var {readFileSync} = (() => ({}));
 function t(route, params) {
@@ -3224,8 +3231,9 @@ var __dirname = "/Users/philippeperret/Programmes/ETC/lib/shared", LOCALES_FOLDE
 var init_Locale = __esm(() => {
   init_path();
   init_js_yaml();
+  init_which_side();
   console.log("__dirname =", __dirname);
-  LOCALES_FOLDER = typeof process !== "undefined" && process.env?.APP_PATH ? path_default.join(process.env.APP_PATH, "lib", "locales") : path_default.resolve(path_default.join(__dirname, "..", "locales"));
+  LOCALES_FOLDER = serverSide && process.env?.APP_PATH ? path_default.join(process.env.APP_PATH, "lib", "locales") : path_default.resolve(path_default.join(__dirname, "..", "locales"));
   console.log("LOCALES_FOLDER =", LOCALES_FOLDER);
   loc = Locale.singleton();
 });
@@ -15936,15 +15944,59 @@ init_utils();
 init_Locale();
 
 // lib/shared/log.ts
+init_path();
+init_which_side();
+var {appendFileSync, existsSync, mkdirSync} = (() => ({}));
+var PATHS = {
+  log: path_default.join("~", "Library", "Logs")
+};
+
 class Log {
   info(message, data = undefined) {
     console.log(message, data);
+    serverSide && this.logInFile(message, data, "info");
   }
   warn(message, data = undefined) {
     console.warn(message, data);
+    serverSide && this.logInFile(message, data, "warn");
   }
   error(message, data = undefined) {
     console.error(message, data);
+    serverSide && this.logInFile(message, data, "error");
+  }
+  logInFile(message, data, errorLevel) {
+    if (data) {
+      data = JSON.stringify(data);
+      message += `
+` + data;
+    }
+    message = `${this.now()} ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`;
+    appendFileSync(this.logFile, message, "utf8");
+  }
+  now() {
+    const n = new Date;
+    const year = n.getFullYear();
+    const month = (n.getMonth() + 1).toString(10).padStart(2, "0");
+    const day = n.getDate().toString(10).padStart(2, "0");
+    const hour = n.getHours().toString(10).padStart(2, "0");
+    const minute = n.getMinutes().toString(10).padStart(2, "0");
+    const second = n.getSeconds().toString(10).padStart(2, "0");
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  }
+  PREFIXBYERRORLEVEL = {
+    info: "",
+    error: "ERROR: ",
+    warn: "WARN: "
+  };
+  get logFile() {
+    return this._logfile || (this._logfile = this.ensureLogFile());
+  }
+  _logfile;
+  ensureLogFile() {
+    if (!existsSync(PATHS.log)) {
+      mkdirSync(PATHS.log);
+    }
+    return path_default.join(PATHS.log, "main.log");
   }
   constructor() {}
   static _inst;
