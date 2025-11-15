@@ -60,6 +60,12 @@ export function setupRoutes(app: Express) {
     });
   });
 
+  /**
+   * Retourne le travail courant à faire
+   * 
+   * (la première fois, retourne aussi les tâches de la 
+   *  todolist)
+   */
   app.post('/work/get-current', (req, res) => {
     log.info("-> /work/get-current");
     let result = {ok: true, error: ''};
@@ -71,6 +77,18 @@ export function setupRoutes(app: Express) {
       });
     } catch(err) {
       result = {ok: false, error: (err as any).message}
+    }
+    if (!options.no_todolist) {
+      const now = new Date().getTime();
+      Object.assign(result, {
+        todolist: {
+          taches: [
+            {id: 1, content: "1. Il faut faire ceci", deadline: now - 1000000},
+            {id: 2, content: "2 Il faut faire cela aussi", deadline: now + 6000000}
+          ],
+          order: [2, 1]
+        }
+      })
     }
     res.json(result);
   });

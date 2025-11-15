@@ -112,6 +112,7 @@ ui:
     to_move_down: To move down
     to_open_preferences: To open and edit preferences
     to_open_project_folder: To open project folder
+    to_open_todolist: To open the todo-list
     to_pause_the_work: To take a break before resuming
     to_restart_work_on_work: To resume working on this work
     to_run_script: To run the script associated with the work

@@ -22,6 +22,8 @@ class DBWorks { /* singleton db */
    * @returns Le travail à travailler
    */
   public getTodayCandidats(conditions: string): WorkType | undefined {
+    log.info("-> getTodayCandidats");
+    log.info("Conditions = ", conditions)
     // if (ENV === 'dev') { this.debugWorkState(conditions) }
     this.debugWorkState(conditions); // Pour le moment, on le fait chaque fois
     const request = `
@@ -232,7 +234,10 @@ class DBWorks { /* singleton db */
     this.db.run(request, workData);
   }
 
-  private getNextCronDateOf(cron: string){
+  private getNextCronDateOf(cron: string): number {
+    return DBWorks.nextCronDateOfCron(cron);
+  }
+  private static nextCronDateOfCron(cron: string): number {
     return CronExpressionParser.parse(cron).next().toDate().getTime();
   }
 
@@ -290,10 +295,28 @@ class DBWorks { /* singleton db */
   private updateCronAtOf(dw: WorkType): void {
     const request = `
       UPDATE works 
-      SET cronedAt = ?, active = ?
-      WHERE id = ?
+      SET 
+        cronedAt = ?, 
+        active = ?,
+        nextCronDateAt = ?
+      WHERE 
+        id = ?
       `
-    this.db.run(request, [new Date().getTime(), 0, dw.id] as any);
+    this.db.run(request, [
+      new Date().getTime(), 
+      0, 
+      DBWorks.nextCronDateOfCron(dw.cron as string),
+      dw.id] as any
+    );
+    log.info(`Cron-travail #${dw.id} saved => désactivé`)
+  }
+
+  public repareNextCronDateOf(work: WorkType){
+    this.db.run(`UPDATE works SET nextCronDateAt = ? WHERE id = ?`, [
+      DBWorks.nextCronDateOfCron(work.cron as string),
+      work.id
+    ])
+
   }
 
   /**

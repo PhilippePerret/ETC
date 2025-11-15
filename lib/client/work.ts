@@ -8,6 +8,7 @@ import { markdown } from "../shared/utils_shared";
 import { postToServer } from "./utils";
 import { t } from "../shared/Locale";
 import log from '../shared/log';
+import todolist from "./todolist.js";
 
 export class Work {
 
@@ -96,9 +97,15 @@ export class Work {
    * tâche des résultats.
    */
   public static async getCurrent(options: RecType = {}): Promise<boolean> {
-    Object.assign(options, {process: 'Work::getCurrent'})
+    Object.assign(options, {
+      process: 'Work::getCurrent',
+      no_todolist: todolist.isReady
+    })
     const retour: RecType = await postToServer('/work/get-current', options);
     if (retour.ok === false) { return false}
+    if (retour.todolist) {
+      todolist.init(retour.todolist.taches, retour.todolist.order)
+    }
     if (retour.work.ok === false) { // <= il n'y aucune tâche active
       Flash.error(t('work.any_active'));
       return false;

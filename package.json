@@ -3,7 +3,7 @@
   "productName": "ETC",
   "description": "Application de gestion cyclique de travaux",
   "author": "Philicare<philippe.perret@yahoo.fr>",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "main": "electron/main.js",
   "devDependencies": {

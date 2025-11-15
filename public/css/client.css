@@ -434,3 +434,20 @@ body.dark button.found-show-whole {
 body.light button.found-show-whole {
   color: #a0a0e6!important;
 }
+
+div#todolist.panel div.panel-content {
+  padding:2em;
+  font-size: 17pt;
+}
+
+div#todolist.panel div.panel-content div.tache {
+  margin-bottom: 8px;
+}
+
+div#todolist.panel div.panel-content input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+div#todolist.panel div.panel-content label {
+  margin-left: 0.5em;
+}

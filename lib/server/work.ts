@@ -112,32 +112,53 @@ export class Work /* server */ {
    *   prouve que le travail n'a pas été démarré et accompli)
    */
   private static awakeCronWorksAtHeadline(){
+    log.info("-> Work.awakeCronWorksAtHeadline")
+    // Protection si on a supprimé le nextCronDateAt qui est
+    // indispensable quand le cron est défini
+    let curwork = {} as WorkType;
+    try {
+      db.findAll(`cron <> '' AND nextCronDateAt IS NULL`).forEach(((w: WorkType) => {
+        curwork = w; // err
+        log.info("Cron-work sans next-date :", w);
+        db.repareNextCronDateOf(w);
+        log.info("-- RÉPARÉ");
+      }));
+    } catch(error){
+      log.error(`Impossible de réparer le cron-travail #${curwork.id} : ${(error as any).message}.`)
+    }
+
     const condition = `
     active = 0
     AND cron <> ''
-    AND nextCronDateAt < ?
+    AND nextCronDateAt < ${new Date().getTime()}
     AND (
       cronedAt IS NULL
       OR
       cronedAt < nextCronDateAt
     )
-
     `
+    let request: string = "";
+    try {
+      // Seulement pour voir les cron-travaux à réveille
+      request = `SELECT id FROM works WHERE ${condition}`
+      const idsToAwake = db.findAll(condition).map((w: WorkType) => w.id);
+      log.info("Cron-works awaken:", idsToAwake);
+  
+      request = `
+      UPDATE works
+      SET
+        active = 1, 
+        leftTime = defaultLeftTime
+      WHERE 
+        ${condition}
+      `
+      db.exec(request);
+    } catch(err) {
+      //@ts-ignore
+      log.error(`IMPOSSIBLE DE RÉVEILLER LES CRON-TRAVAUX avec la requête :\n${request}\nErr: ${err.message}`);
+    }
 
-    const checkRequest = `SELECT id FROM works WHERE ${condition}`
-    const idsToAwake = db.exec(checkRequest);
-    log.info("Works with cron awaken:", idsToAwake);
-
-    const request = `
-    UPDATE works
-    SET
-      active = 1, 
-      leftTime = defaultLeftTime
-    WHERE 
-      ${condition}
-    `
-    db.exec(request);
-
+    log.info("<- Work.awakeCronWorksAtHeadline")
   }
 
 

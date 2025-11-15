@@ -16174,7 +16174,8 @@ class Log {
     } else {
       console[errorLevel](message);
     }
-    message = `[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`;
+    message = `
+[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`;
     appendFileSync(this.logFile, message, "utf8");
   }
   now() {
@@ -16208,6 +16209,177 @@ class Log {
 }
 var log = Log.singleton();
 var log_default = log;
+// lib/client/Panel.ts
+class Panel {
+  data;
+  obj;
+  btnOk;
+  fldContent;
+  built = false;
+  constructor(data) {
+    this.data = data;
+  }
+  setContent(contenu) {
+    this.fldContent.innerHTML = contenu;
+  }
+  onOk(ev) {
+    stopEvent(ev);
+    this.close();
+  }
+  show() {
+    this.built || this.build();
+    this.obj.classList.remove("hidden");
+  }
+  close() {
+    this.obj.classList.add("hidden");
+  }
+  build() {
+    const o = document.createElement("DIV");
+    if (this.data.id) {
+      o.id = this.data.id;
+    }
+    o.classList.add(...["panel", "hidden"]);
+    const tit = document.createElement("DIV");
+    tit.classList.add("panel-title");
+    tit.innerHTML = this.data.title;
+    o.appendChild(tit);
+    const c = document.createElement("DIV");
+    c.classList.add("panel-content");
+    c.innerHTML = this.data.content;
+    o.appendChild(c);
+    this.fldContent = c;
+    const f = document.createElement("FOOTER");
+    o.appendChild(f);
+    if (typeof this.data.buttons === "string") {
+      this.btnOk = document.createElement("BUTTON");
+      this.btnOk.innerHTML = this.data.buttons;
+      this.btnOk.className = "fleft";
+      f.appendChild(this.btnOk);
+      this.btnOk.addEventListener("click", this.onOk.bind(this));
+    } else {
+      this.data.buttons.forEach((btn) => {
+        const b = document.createElement("BUTTON");
+        b.innerHTML = btn.text;
+        if (btn.class) {
+          b.className = btn.class;
+        }
+        f.appendChild(b);
+        if (typeof btn.onclick === "function") {
+          b.addEventListener("click", btn.onclick);
+        } else {
+          b.addEventListener("click", this[btn.onclick].bind(this));
+        }
+      });
+    }
+    document.body.appendChild(o);
+    this.obj = o;
+    this.built = true;
+    this.observe();
+  }
+  observe() {}
+}
+
+// lib/client/todolist.ts
+init_utils();
+
+class TodoList {
+  taches;
+  table;
+  isReady = false;
+  async open() {
+    this.panel.show();
+  }
+  init(taches, order2) {
+    this.buildPanel();
+    this.taches = taches;
+    this.table = {};
+    this.taches.forEach((tdata) => {
+      const tache = new Tache(this, tdata);
+      Object.assign(this.table, { [tache.id]: tache });
+    });
+    const sorted_taches = [];
+    order2.forEach((tid) => sorted_taches.push(this.table[tid]));
+    this.peuplePanel(sorted_taches);
+    this.observe();
+  }
+  observe() {
+    DGet("button.btn-todolist").addEventListener("click", this.open.bind(this));
+  }
+  get panel() {
+    return this._panel;
+  }
+  _panel;
+  get content() {
+    return this._content || (this._content = this.panel.fldContent);
+  }
+  _content;
+  onClickSave(ev) {
+    ev && stopEvent(ev);
+    this.saveAll();
+  }
+  async saveAll() {
+    const retour = await postToServer("/todolist/save-all", {
+      process: "TodoList.save",
+      taches: this.taches
+    });
+  }
+  onClickFinir(ev) {
+    ev && stopEvent(ev);
+    this.panel.close();
+  }
+  peuplePanel(sorted_taches) {
+    sorted_taches.forEach((t2) => t2.build());
+    this.isReady = true;
+  }
+  buildPanel() {
+    const panel = new Panel({
+      id: "todolist",
+      title: "Todo liste",
+      buttons: [
+        { text: "Finir", onclick: this.onClickFinir.bind(this), role: "cancel", class: "fleft" },
+        { text: "Enregistrer", onclick: this.onClickSave.bind(this), role: "default" }
+      ],
+      content: ""
+    });
+    panel.build();
+    this._panel = panel;
+  }
+  constructor() {}
+  static _sing;
+  static singleton() {
+    return this._sing || (this._sing = new TodoList);
+  }
+}
+
+class Tache {
+  owner;
+  data;
+  panel;
+  id;
+  obj;
+  constructor(owner, data) {
+    this.owner = owner;
+    this.data = data;
+    this.panel = this.owner.content;
+    this.id = data.id;
+  }
+  build() {
+    const o = document.createElement("DIV");
+    o.className = "tache";
+    const cb = document.createElement("INPUT");
+    o.appendChild(cb);
+    cb.type = "checkbox";
+    cb.id = `tache-${this.id}-cb`;
+    const lab = document.createElement("LABEL");
+    o.appendChild(lab);
+    lab.setAttribute("for", cb.id);
+    lab.innerHTML = this.data.content;
+    this.panel.appendChild(o);
+    this.obj = o;
+  }
+}
+var todolist = TodoList.singleton();
+var todolist_default = todolist;
 
 // lib/client/work.ts
 class Work {
@@ -16268,10 +16440,16 @@ class Work {
   }
   static _obj;
   static async getCurrent(options = {}) {
-    Object.assign(options, { process: "Work::getCurrent" });
+    Object.assign(options, {
+      process: "Work::getCurrent",
+      no_todolist: todolist_default.isReady
+    });
     const retour = await postToServer("/work/get-current", options);
     if (retour.ok === false) {
       return false;
+    }
+    if (retour.todolist) {
+      todolist_default.init(retour.todolist.taches, retour.todolist.order);
     }
     if (retour.work.ok === false) {
       Flash.error(t("work.any_active"));

@@ -29,7 +29,7 @@ class Log { /* singleton log */
     } else {
       console[errorLevel](message);
     }
-    message = `[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`
+    message = `\n[${this.now()}] ${this.PREFIXBYERRORLEVEL[errorLevel]}${message}`
     appendFileSync(this.logFile, message, 'utf8'); 
   }
 

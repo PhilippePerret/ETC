@@ -13,6 +13,7 @@ export type ButtonType = {
   text: string;
   onclick: Function | string;
   role?: 'default' | 'cancel';
+  class?: string;
 }
 
 export interface WorkType {

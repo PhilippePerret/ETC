@@ -1,5 +1,4 @@
 import type { ButtonType } from "../shared/types";
-import { t } from '../shared/Locale';
 import { stopEvent } from "../../public/js/dom";
 
 /**
@@ -8,13 +7,14 @@ import { stopEvent } from "../../public/js/dom";
 export class Panel {
   private obj!: HTMLDivElement;
   private btnOk!: HTMLButtonElement;
-  private fldContent!: HTMLDivElement;
+  public fldContent!: HTMLDivElement;
   private built: boolean = false;
 
   constructor(
     private data: {
-      title: string,
-      buttons: 'ok' | string | ButtonType[]
+      id?: string;
+      title: string;
+      buttons: 'ok' | string | ButtonType[];
       content: string;
     }
   ){}
@@ -39,6 +39,7 @@ export class Panel {
 
   build(){
     const o = document.createElement('DIV');
+    if (this.data.id) { o.id = this.data.id }
     o.classList.add(...['panel', 'hidden']);
     const tit = document.createElement('DIV');
     tit.classList.add('panel-title');
@@ -51,10 +52,29 @@ export class Panel {
     this.fldContent = c as HTMLDivElement;
     const f = document.createElement('FOOTER');
     o.appendChild(f);
-    this.btnOk = document.createElement('BUTTON') as HTMLButtonElement;
-    this.btnOk.innerHTML = this.data.buttons as string;
-    this.btnOk.className = 'fleft';
-    f.appendChild(this.btnOk);
+    if ( 'string' === typeof this.data.buttons) {
+      this.btnOk = document.createElement('BUTTON') as HTMLButtonElement;
+      this.btnOk.innerHTML = this.data.buttons as string;
+      this.btnOk.className = 'fleft';
+      f.appendChild(this.btnOk);
+      this.btnOk.addEventListener('click', this.onOk.bind(this));
+    } else {
+      // C'est donc une liste de boutons
+      this.data.buttons.forEach((btn: ButtonType) => {
+        const b = document.createElement('BUTTON') as HTMLButtonElement;
+        b.innerHTML = btn.text as string;
+        if ( btn.class ) {b.className = btn.class;}
+        f.appendChild(b);
+        if ( 'function' === typeof btn.onclick) {
+          //@ts-ignore
+          b.addEventListener('click', btn.onclick);
+        } else {
+          //@ts-ignore
+          b.addEventListener('click', this[btn.onclick].bind(this))
+        }
+      });
+    }
+
     document.body.appendChild(o);
     this.obj = o as HTMLDivElement;
 
@@ -63,6 +83,5 @@ export class Panel {
   }
 
   private observe(){
-    this.btnOk.addEventListener('click', this.onOk.bind(this));
   }
 }
